@@ -8,24 +8,52 @@ module.exports = async function handler(req, res) {
   const { poin, level, evidence, namaSantri, kelas } = req.body || {};
   if (!poin || !level) return res.status(400).json({ error: 'poin dan level wajib diisi' });
 
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) return res.status(500).json({ error: 'API key belum dikonfigurasi' });
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_API_KEY) return res.status(500).json({ error: 'API key belum dikonfigurasi' });
 
-  const levelFull = { MB:'Mulai Berkembang', BCB:'Berkembang Cukup Baik', BSB:'Berkembang Sangat Baik' }[level] || level;
-  const prompt = 'Kamu adalah Musyrifah di KB-TK Tarbiyah Quraniyah (TaQi). Tulis narasi rapor.\n\nATURAN:\n1. Mulai dengan Alhamdulillah atau MasyaAllah\n2. Pola: PENCAPAIAN - BUKTI - INSIGHT - DOA\n3. Panjang: 60-120 kata\n4. DILARANG: kurang, lemah, gagal, buruk\n5. Tutup dengan Semoga\n6. Sebut Ananda [nama pertama]\n\nDATA: Nama=' + (namaSantri||'Santri') + ', Kelas=' + (kelas||'TK') + ', Poin=' + poin + ', Level=' + levelFull + ', Evidence=' + (evidence||'-') + '\n\nTulis narasi:';
+  const levelFull = { MB: 'Mulai Berkembang', BCB: 'Berkembang Cukup Baik', BSB: 'Berkembang Sangat Baik' }[level] || level;
+
+  const prompt = `Kamu adalah Musyrifah (guru) di KB-TK Tarbiyah Qur'aniyah (TaQi), sekolah Islam berbasis karakter Qur'ani. Tugasmu menulis narasi rapor perkembangan santri yang hangat, personal, dan Islami.
+
+ATURAN WAJIB:
+1. Mulai dengan "Alhamdulillah" atau "MasyaAllah"
+2. Pola narasi: PENCAPAIAN -> BUKTI NYATA -> INSIGHT PERKEMBANGAN -> HARAPAN & DOA
+3. Panjang: 60-120 kata (tidak lebih, tidak kurang)
+4. DILARANG menggunakan kata: kurang, lemah, gagal, buruk, tidak bisa, belum mampu, masih kesulitan
+5. Jika ada hal yang perlu ditingkatkan, ungkapkan HANYA sebagai harapan/doa di akhir
+6. Tutup dengan "Semoga..." atau kalimat doa
+7. Bahasa hangat, personal - seperti Musyrifah yang benar-benar mengenal dan menyayangi santrinya
+8. Sebut santri dengan "Ananda [nama pertama]"
+9. Boleh menyebut nama Allah, Rasulullah, atau kutipan Islami yang relevan
+
+DATA SANTRI:
+- Nama: ${namaSantri}
+- Kelas: ${kelas}
+- Poin Penilaian: ${poin}
+- Tingkat Perkembangan: ${levelFull} (${level})
+- Catatan Evidence: ${evidence || '(tidak ada catatan khusus, tulis narasi umum yang sesuai dengan level)'}
+
+Tulis HANYA narasi rapor (tanpa judul, tanpa penjelasan tambahan):`;
 
   try {
     const https = require('https');
     const postData = JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.8, maxOutputTokens: 350 },
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 350,
+      temperature: 0.8,
     });
+
     const narasi = await new Promise((resolve, reject) => {
       const opts = {
-        hostname: 'generativelanguage.googleapis.com',
-        path: '/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_API_KEY,
+        hostname: 'api.groq.com',
+        path: '/openai/v1/chat/completions',
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + GROQ_API_KEY,
+          'Content-Length': Buffer.byteLength(postData),
+        },
       };
       const r = https.request(opts, (resp) => {
         let data = '';
@@ -33,8 +61,8 @@ module.exports = async function handler(req, res) {
         resp.on('end', () => {
           try {
             const p = JSON.parse(data);
-            if (p.error) { reject(new Error('Gemini: ' + p.error.message)); return; }
-            const t = p.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (p.error) { reject(new Error('Groq: ' + p.error.message)); return; }
+            const t = p.choices?.[0]?.message?.content?.trim();
             if (t) resolve(t);
             else reject(new Error('No text in response: ' + data.substring(0, 300)));
           } catch(e) { reject(new Error('Parse error: ' + data.substring(0, 200))); }
@@ -44,6 +72,7 @@ module.exports = async function handler(req, res) {
       r.write(postData);
       r.end();
     });
+
     return res.status(200).json({ narasi });
   } catch(e) {
     return res.status(500).json({ error: e.message });
