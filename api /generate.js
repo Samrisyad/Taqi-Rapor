@@ -1,11 +1,11 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { poin, level, evidence, namaSantri, kelas } = req.body;
+  const { poin, level, evidence, namaSantri, kelas } = req.body || {};
 
   if (!poin || !level) {
     return res.status(400).json({ error: 'poin dan level wajib diisi' });
@@ -27,13 +27,12 @@ export default async function handler(req, res) {
 ATURAN WAJIB:
 1. Mulai dengan "Alhamdulillah" atau "MasyaAllah"
 2. Pola narasi: PENCAPAIAN → BUKTI NYATA → INSIGHT PERKEMBANGAN → HARAPAN & DOA
-3. Panjang: 60–120 kata (tidak lebih, tidak kurang)
+3. Panjang: 60-120 kata (tidak lebih, tidak kurang)
 4. DILARANG menggunakan kata: kurang, lemah, gagal, buruk, tidak bisa, belum mampu, masih kesulitan
 5. Jika ada hal yang perlu ditingkatkan, ungkapkan HANYA sebagai harapan/doa di akhir
 6. Tutup dengan "Semoga..." atau kalimat doa
 7. Bahasa hangat, personal seperti Musyrifah yang menyayangi santrinya
 8. Sebut santri dengan "Ananda [nama pertama]"
-9. Boleh menyebut nama Allah, Rasulullah, atau kutipan Islami yang relevan
 
 DATA SANTRI:
 - Nama: ${namaSantri}
@@ -69,4 +68,6 @@ Tulis HANYA narasi rapor (tanpa judul, tanpa penjelasan tambahan):`;
 
     return res.status(200).json({ narasi });
   } catch (e) {
-    return res.status(500).json({ error: e.message
+    return res.status(500).json({ error: e.message });
+  }
+};
