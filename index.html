@@ -886,8 +886,34 @@ function onOverlayClick(e){
 // ══════════════════════════════════════════
 function downloadPDF(){
   const data = getForm();
-  document.getElementById('pdf-print-area').innerHTML = buildRaporHTML(data);
-  window.print();
+  const allChildren = Array.from(document.body.children);
+  allChildren.forEach(el => { el._origDisplay = el.style.display; el.style.display = 'none'; });
+  document.body.style.overflow = '';
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pt';
+  wrapper.style.cssText = 'width:794px;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;background:#fff;';
+  wrapper.innerHTML = buildRaporHTML(data);
+  wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse = 'collapse'; });
+  wrapper.querySelectorAll('td,th').forEach(el => { el.style.border = '1px solid #000'; });
+  document.body.appendChild(wrapper);
+  const nama = document.getElementById('f-nama').value || 'Santri';
+  const sem  = data.semester.replace(/\s/g,'');
+  const tahun= data.tahun;
+  const restore = () => {
+    if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+    allChildren.forEach(el => { el.style.display = el._origDisplay || ''; });
+  };
+  setTimeout(() => {
+    html2pdf().set({
+      margin: [10,12,10,12],
+      filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
+      image: { type:'jpeg', quality:0.97 },
+      html2canvas: { scale:2, useCORS:true, letterRendering:true },
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+    }).from(wrapper).save()
+      .then(restore)
+      .catch(e => { restore(); alert('Gagal buat PDF: ' + e.message); });
+  }, 300);
 }
 
 // ══════════════════════════════════════════
