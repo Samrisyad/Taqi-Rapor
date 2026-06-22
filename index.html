@@ -891,7 +891,7 @@ function downloadPDF(){
   document.body.style.overflow = 'visible';
   const wrapper = document.createElement('div');
   wrapper.className = 'pt';
-  wrapper.style.cssText = 'width:794px;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
+  wrapper.style.cssText = 'width:703px;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
   wrapper.innerHTML = buildRaporHTML(data);
   wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse = 'collapse'; });
   wrapper.querySelectorAll('td,th').forEach(el => { el.style.border = '1px solid #000'; });
