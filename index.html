@@ -891,10 +891,10 @@ function downloadPDF(){
   document.body.style.overflow = 'visible';
   const wrapper = document.createElement('div');
   wrapper.className = 'pt';
-  wrapper.style.cssText = 'width:703px;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
+  wrapper.style.cssText = 'width:680px;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
   wrapper.innerHTML = buildRaporHTML(data);
-  wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse = 'collapse'; });
-  wrapper.querySelectorAll('td,th').forEach(el => { el.style.border = '1px solid #000'; });
+  wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse = 'collapse'; t.style.tableLayout = 'fixed'; t.style.width = '100%'; });
+  wrapper.querySelectorAll('td,th').forEach(el => { el.style.border = '1px solid #000'; el.style.overflowWrap = 'break-word'; el.style.wordBreak = 'break-word'; });
   document.body.appendChild(wrapper);
   const nama = document.getElementById('f-nama').value || 'Santri';
   const sem  = data.semester.replace(/\s/g,'');
@@ -906,7 +906,7 @@ function downloadPDF(){
   };
   setTimeout(() => {
     html2pdf().set({
-      margin: [10,12,10,12],
+      margin: [10,15,10,15],
       filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
       image: { type:'jpeg', quality:0.97 },
       html2canvas: { scale:2, useCORS:true, letterRendering:true, scrollX:0, scrollY:0 },
