@@ -862,25 +862,39 @@ function onOverlayClick(e){
 // ══════════════════════════════════════════
 function downloadPDF(){
   const data = getForm();
-  const wrapper = document.createElement('div');
-  wrapper.className = 'pt';
-  wrapper.style.cssText = 'position:fixed;top:0;left:0;width:794px;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;background:#fff;padding:0;z-index:99999;pointer-events:none;';
-  wrapper.innerHTML = buildRaporHTML(data);
-  document.body.appendChild(wrapper);
-  wrapper.querySelectorAll('table').forEach(t=>{ t.style.borderCollapse='collapse'; });
-  wrapper.querySelectorAll('td,th').forEach(el=>{ el.style.border='1px solid #000'; });
+
+  // Reuse #rapor-preview which we know renders correctly
+  const previewEl = document.getElementById('rapor-preview');
+  previewEl.innerHTML = buildRaporHTML(data);
+  previewEl.querySelectorAll('table').forEach(t=>{ t.style.borderCollapse='collapse'; });
+  previewEl.querySelectorAll('td,th').forEach(el=>{ el.style.border='1px solid #000'; });
+
+  // Open modal so element is visible (html2canvas requires display != none)
+  const modal = document.getElementById('preview-modal');
+  const wasOpen = modal.classList.contains('open');
+  if (!wasOpen) {
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
   const nama = document.getElementById('f-nama').value || 'Santri';
   const sem  = data.semester.replace(/\s/g,'');
   const tahun= data.tahun;
+
   setTimeout(() => {
     html2pdf().set({
       margin: [10,12,10,12],
       filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
       image: { type:'jpeg', quality:0.97 },
-      html2canvas: { scale:2, useCORS:true, letterRendering:true, windowWidth:794 },
+      html2canvas: { scale:2, useCORS:true, letterRendering:true },
       jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
-    }).from(wrapper).save().then(()=>{ document.body.removeChild(wrapper); });
-  }, 200);
+    }).from(previewEl).save().then(() => {
+      if (!wasOpen) {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  }, 300);
 }
 
 // ══════════════════════════════════════════
