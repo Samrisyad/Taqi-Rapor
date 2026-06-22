@@ -193,12 +193,36 @@ textarea{resize:vertical}
 #print-area{display:none}
 
 /* ── MOBILE ── */
-@media(max-width:600px){
+@media(max-width:640px){
+  .page{padding:12px 12px 100px}
   .grid2,.grid3{grid-template-columns:1fr}
+  .hdr{padding:8px 14px}
   .hdr-title{font-size:13px}
+  .hdr-sub{display:none}
   .btn span{display:none}
-  .page{padding:12px 12px 90px}
-  .bottom-bar{padding:10px 12px}
+  .hdr-logo{width:30px;height:30px;font-size:9px}
+  .bottom-bar{padding:10px 12px;gap:8px}
+  .bottom-bar-left{flex:1}
+  .bottom-bar-left .btn{flex:1;justify-content:center;min-height:44px}
+  .bottom-bar .btn-success{flex:1;justify-content:center;min-height:44px}
+  .card-hdr{padding:10px 13px}
+  .card-body{padding:12px}
+  input,select,textarea{font-size:16px}
+  .btn-ai{font-size:12px;padding:8px 12px;min-height:38px}
+  .lvl-toggle{gap:4px}
+  .lvl-btn{padding:10px 4px;font-size:12px;min-height:44px}
+  .poin-card-hdr{flex-wrap:wrap;gap:6px}
+  .poin-left{flex:1;min-width:0}
+  .poin-title{font-size:12px;word-break:break-word}
+  .abs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .modal-overlay{padding:0}
+  .modal-box{border-radius:0;min-height:100dvh;display:flex;flex-direction:column}
+  .modal-hdr{padding:10px 14px;flex-shrink:0}
+  .modal-hdr .modal-title{font-size:13px}
+  .modal-body{padding:0;flex:1;overflow-y:auto;overflow-x:hidden;background:#e5e7eb;display:flex;justify-content:center;align-items:flex-start}
+  .preview-a4{zoom:0.48;width:720px;max-width:none;padding:10mm 10mm;box-shadow:none;margin:8px auto}
+  .ta-narasi{min-height:80px}
+  .sec-hdr{flex-wrap:wrap;gap:4px}
 }
 </style>
 </head>
@@ -862,39 +886,8 @@ function onOverlayClick(e){
 // ══════════════════════════════════════════
 function downloadPDF(){
   const data = getForm();
-
-  // Reuse #rapor-preview which we know renders correctly
-  const previewEl = document.getElementById('rapor-preview');
-  previewEl.innerHTML = buildRaporHTML(data);
-  previewEl.querySelectorAll('table').forEach(t=>{ t.style.borderCollapse='collapse'; });
-  previewEl.querySelectorAll('td,th').forEach(el=>{ el.style.border='1px solid #000'; });
-
-  // Open modal so element is visible (html2canvas requires display != none)
-  const modal = document.getElementById('preview-modal');
-  const wasOpen = modal.classList.contains('open');
-  if (!wasOpen) {
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  const nama = document.getElementById('f-nama').value || 'Santri';
-  const sem  = data.semester.replace(/\s/g,'');
-  const tahun= data.tahun;
-
-  setTimeout(() => {
-    html2pdf().set({
-      margin: [10,12,10,12],
-      filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
-      image: { type:'jpeg', quality:0.97 },
-      html2canvas: { scale:2, useCORS:true, letterRendering:true },
-      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
-    }).from(previewEl).save().then(() => {
-      if (!wasOpen) {
-        modal.classList.remove('open');
-        document.body.style.overflow = '';
-      }
-    });
-  }, 300);
+  document.getElementById('pdf-print-area').innerHTML = buildRaporHTML(data);
+  window.print();
 }
 
 // ══════════════════════════════════════════
