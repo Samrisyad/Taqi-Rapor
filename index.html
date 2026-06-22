@@ -862,28 +862,25 @@ function onOverlayClick(e){
 // ══════════════════════════════════════════
 function downloadPDF(){
   const data = getForm();
-  // Build rapor in a temp wrapper
   const wrapper = document.createElement('div');
   wrapper.className = 'pt';
-  wrapper.style.cssText = 'width:170mm;font-family:Times New Roman,serif;font-size:10pt;color:#000;background:#fff;padding:0';
+  wrapper.style.cssText = 'position:fixed;top:0;left:0;width:794px;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;background:#fff;padding:0;z-index:99999;pointer-events:none;';
   wrapper.innerHTML = buildRaporHTML(data);
   document.body.appendChild(wrapper);
-
-  // Apply inline styles for html2canvas (tables, etc.)
-  wrapper.querySelectorAll('table').forEach(t=>{ t.style.borderCollapse='collapse'; t.style.width=t.className.includes('pt-sign-tbl')?'100%':t.style.width; });
-  wrapper.querySelectorAll('td,th').forEach(el=>{ if(!el.style.border) el.style.border='1px solid #000'; });
-
+  wrapper.querySelectorAll('table').forEach(t=>{ t.style.borderCollapse='collapse'; });
+  wrapper.querySelectorAll('td,th').forEach(el=>{ el.style.border='1px solid #000'; });
   const nama = document.getElementById('f-nama').value || 'Santri';
   const sem  = data.semester.replace(/\s/g,'');
   const tahun= data.tahun;
-
-  html2pdf().set({
-    margin: [10,12,10,12],
-    filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
-    image: { type:'jpeg', quality:0.97 },
-    html2canvas: { scale:2, useCORS:true, letterRendering:true },
-    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
-  }).from(wrapper).save().then(()=>{ document.body.removeChild(wrapper); });
+  setTimeout(() => {
+    html2pdf().set({
+      margin: [10,12,10,12],
+      filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
+      image: { type:'jpeg', quality:0.97 },
+      html2canvas: { scale:2, useCORS:true, letterRendering:true, windowWidth:794 },
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+    }).from(wrapper).save().then(()=>{ document.body.removeChild(wrapper); });
+  }, 200);
 }
 
 // ══════════════════════════════════════════
