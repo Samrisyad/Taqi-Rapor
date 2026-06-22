@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaQi Rapor AI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root {
+  --primary:#1e1b4b; --primary-hover:#312e81;
+  --accent:#7c3aed; --accent-light:#ede9fe;
+  --green:#16a34a; --green-bg:#dcfce7; --green-border:#22c55e;
+  --blue:#1d4ed8; --blue-bg:#eff6ff; --blue-border:#3b82f6;
+  --amber:#b45309; --amber-bg:#fef3c7; --amber-border:#f59e0b;
+  --gray-50:#f9fafb; --gray-100:#f3f4f6; --gray-200:#e5e7eb;
+  --gray-300:#d1d5db; --gray-500:#6b7280; --gray-700:#374151; --gray-900:#111827;
+  --radius:8px; --shadow:0 1px 3px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--gray-100);color:var(--gray-900);font-size:14px;line-height:1.5}
+
+/* ── HEADER ── */
+.hdr{background:var(--primary);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hdr-brand{display:flex;align-items:center;gap:10px}
+.hdr-logo{width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:var(--primary);flex-shrink:0}
+.hdr-title{font-size:15px;font-weight:700}
+.hdr-sub{font-size:11px;opacity:.6}
+.hdr-actions{display:flex;gap:8px;align-items:center}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 14px;border-radius:var(--radius);border:none;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;font-family:inherit}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#6d28d9}
+.btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+.btn-success{background:var(--green);color:#fff}
+.btn-success:hover{background:#15803d}
+.btn-outline{background:#fff;color:var(--gray-700);border:1.5px solid var(--gray-300)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger-outline{background:#fff;color:#dc2626;border:1.5px solid #fca5a5}
+.btn-danger-outline:hover{background:#fef2f2}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-ai{padding:4px 10px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent-light);color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn-ai:hover{background:var(--accent);color:#fff}
+.btn-ai:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── MAIN ── */
+.page{max-width:820px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card-hdr{padding:12px 16px;border-bottom:1.5px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card-hdr-title{font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
+.card-body{padding:16px}
+.sec-badge{background:var(--primary);color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;flex-shrink:0}
+
+/* ── GRID ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+
+/* ── FORM FIELDS ── */
+.fg{display:flex;flex-direction:column;gap:5px}
+label.lbl{font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.04em}
+input,select,textarea{border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:inherit;color:var(--gray-900);transition:border-color .15s;background:#fff;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+input[readonly]{background:var(--gray-50);color:var(--gray-500);cursor:default}
+textarea{resize:vertical}
+
+/* ── AUTOCOMPLETE ── */
+.ac-wrap{position:relative}
+.ac-list{position:absolute;top:calc(100% + 3px);left:0;right:0;background:#fff;border:1.5px solid var(--gray-300);border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:100;max-height:200px;overflow-y:auto;display:none}
+.ac-list.show{display:block}
+.ac-item{padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--gray-100)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item:focus{background:var(--accent-light)}
+.ac-name{font-size:13px;font-weight:500}
+.ac-sub{font-size:11px;color:var(--gray-500);margin-top:1px}
+
+/* ── SHEETS STATUS ── */
+.status-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.status-ok{background:#dcfce7;color:#166534}
+.status-warn{background:#fef3c7;color:#92400e}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ── ASSESSMENT POIN ── */
+.poin-card{border:1.5px solid var(--gray-200);border-radius:var(--radius);margin-bottom:10px}
+.poin-card:last-of-type{margin-bottom:4px}
+.poin-card-hdr{padding:9px 13px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;border-radius:var(--radius) var(--radius) 0 0}
+.poin-left{display:flex;align-items:center;gap:9px}
+.poin-no{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.poin-title{font-weight:600;font-size:13px}
+.poin-body{padding:13px}
+.poin-body-inner{display:flex;flex-direction:column;gap:10px}
+.field-lbl{font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+
+/* ── LEVEL TOGGLE ── */
+.lvl-toggle{display:flex;gap:8px}
+.lvl-btn{flex:1;padding:8px;border:2px solid var(--gray-200);background:#fff;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;color:var(--gray-400);transition:all .15s;text-align:center;font-family:inherit}
+.lvl-btn:hover{border-color:var(--gray-400);color:var(--gray-600)}
+.lvl-btn.act-MB{border-color:var(--amber-border);background:var(--amber-bg);color:var(--amber)}
+.lvl-btn.act-BCB{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue)}
+.lvl-btn.act-BSB{border-color:var(--green-border);background:var(--green-bg);color:var(--green)}
+
+.ta-evidence{min-height:50px;font-size:12px}
+.ta-narasi{min-height:90px;font-size:12px;line-height:1.7}
+
+.del-btn{background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;padding:2px 4px;transition:color .15s;border-radius:4px}
+.del-btn:hover{color:#dc2626;background:#fef2f2}
+
+.add-poin-btn{width:100%;padding:10px;border:2px dashed var(--gray-300);background:transparent;border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--gray-500);font-weight:500;transition:all .15s;margin-top:6px;font-family:inherit}
+.add-poin-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+/* ── ABSENSI ── */
+.abs-wrap{overflow-x:auto}
+.abs-tbl{border-collapse:collapse;min-width:400px}
+.abs-tbl th,.abs-tbl td{border:1.5px solid var(--gray-200);padding:8px 16px;text-align:center;font-size:13px}
+.abs-tbl th{background:var(--gray-50);font-weight:600;color:var(--gray-700)}
+.abs-tbl td:first-child{font-weight:600;text-align:left;padding-left:12px}
+.abs-tbl input{border:none;text-align:center;font-size:13px;background:transparent;width:70px;padding:2px;outline:none}
+
+/* ── KESIMPULAN ── */
+.kesim-list{display:flex;flex-direction:column;gap:8px}
+.kesim-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:2px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;transition:all .15s}
+.kesim-opt:hover{border-color:var(--gray-400)}
+.kesim-opt input[type=radio]{margin-top:2px;width:auto;flex-shrink:0}
+.kesim-opt.sel-MB{border-color:var(--amber-border);background:var(--amber-bg)}
+.kesim-opt.sel-BCB{border-color:var(--blue-border);background:var(--blue-bg)}
+.kesim-opt.sel-BSB{border-color:var(--green-border);background:var(--green-bg)}
+.kesim-lbl{font-weight:700;font-size:13px}
+.kesim-desc{font-size:11px;color:var(--gray-500);margin-top:2px}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid var(--gray-200);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:150;box-shadow:0 -4px 12px rgba(0,0,0,.08)}
+.bottom-bar-left{display:flex;align-items:center;gap:10px}
+
+/* ── PREVIEW MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--gray-100);width:100%;max-width:760px;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);min-height:80vh}
+.modal-hdr{background:var(--primary);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-weight:700;font-size:14px}
+.modal-actions{display:flex;gap:8px;align-items:center}
+.modal-body{padding:20px;display:flex;justify-content:center}
+.preview-a4{background:#fff;width:100%;max-width:720px;padding:18mm 20mm;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+
+/* ══════════════════════════════════════════
+   PDF / RAPOR TEMPLATE STYLES
+══════════════════════════════════════════ */
+.pt{font-family:'Times New Roman',Times,serif;font-size:10pt;color:#000;line-height:1.5}
+.pt *{box-sizing:border-box}
+
+.pt-hdr{display:flex;align-items:flex-start;gap:14px;border-bottom:2.5px solid #000;padding-bottom:10px;margin-bottom:10px}
+.pt-logo{width:66px;height:66px;border:2px solid #333;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10pt;font-weight:900;color:#1e1b4b;flex-shrink:0;font-family:sans-serif;text-align:center;line-height:1.2}
+.pt-school-info{flex:1}
+.pt-bismillah{text-align:right;font-size:16pt;margin-bottom:4px}
+.pt-sname{font-size:14pt;font-weight:900;margin-bottom:2px}
+.pt-saddr{font-size:8.5pt;color:#111;line-height:1.65}
+
+.pt-title{text-align:center;margin:10px 0}
+.pt-title-main{font-size:11.5pt;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+.pt-title-sub{font-size:10.5pt;font-weight:700;margin-top:3px}
+
+.pt-sinfo{margin-bottom:10px;font-size:9.5pt;display:grid;grid-template-columns:1fr 1fr;gap:2px 16px}
+.pt-si{display:flex;gap:4px}
+.pt-si-key{min-width:105px;font-weight:700}
+
+.pt-tbl{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:9.5pt}
+.pt-tbl td{border:1px solid #000;padding:3px 6px;vertical-align:top}
+.pt-tbl th{border:1px solid #000;padding:3px 6px}
+
+.pt-sec-hdr{background:#3a3a3a;color:#fff;font-weight:700;font-size:9.5pt;vertical-align:middle;text-align:center}
+.pt-sec-no{width:24px;text-align:center;vertical-align:middle;font-weight:700}
+.pt-poin-hdr td{font-weight:700;background:#f0f0f0;font-size:9.5pt}
+.pt-poin-no{width:24px;text-align:center;vertical-align:middle}
+.pt-narasi{min-height:56px;font-size:9.5pt;line-height:1.6;padding:4px 6px}
+
+.pt-abs-wrap{margin-bottom:8px}
+.pt-abs-tbl{border-collapse:collapse;font-size:9.5pt}
+.pt-abs-tbl th,.pt-abs-tbl td{border:1px solid #000;padding:3px 14px;text-align:center}
+.pt-abs-tbl th{background:#f0f0f0;font-weight:700}
+.pt-abs-tbl td:first-child{font-weight:700;text-align:left;padding-left:8px}
+
+.pt-sign-date{font-size:9.5pt;margin:8px 0}
+.pt-sign-tbl{width:100%;border-collapse:collapse;font-size:9.5pt}
+.pt-sign-tbl td{border:1px solid #000;padding:4px 10px;text-align:center;width:33.33%;vertical-align:top}
+.pt-sign-space{height:56px}
+.pt-sign-name{font-weight:700;border-top:1px solid #000;padding-top:3px;margin-top:0}
+.pt-sign-role{font-size:8.5pt;margin-top:1px}
+
+/* ── PRINT ── */
+@media print{body>*{display:none!important}#print-area{display:block!important}}
+#print-area{display:none}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .grid2,.grid3{grid-template-columns:1fr}
+  .hdr-title{font-size:13px}
+  .btn span{display:none}
+  .page{padding:12px 12px 90px}
+  .bottom-bar{padding:10px 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">TQ</div>
+    <div>
+      <div class="hdr-title">TaQi Rapor AI</div>
+      <div class="hdr-sub">KB-TK Tarbiyah Qur'aniyah</div>
+    </div>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn btn-ghost btn-sm" onclick="loadContoh()">✨ <span>Muat Contoh</span></button>
+    <button class="btn btn-ghost btn-sm" onclick="clearForm()">🗑 <span>Reset</span></button>
+  </div>
+</header>
+
+<!-- MAIN FORM -->
+<div class="page" id="main-page">
+
+  <!-- ── DATA PROFIL ── -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-title">👤 Data Profil Santri</div>
+      <span class="status-pill status-warn" id="sheets-status">
+        <span class="status-dot" style="background:#f59e0b"></span>Menghubungkan…
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="grid2" style="gap:14px">
+
+        <div class="fg full">
+          <label class="lbl">Nama Lengkap Santri</label>
+          <div class="ac-wrap">
+            <input type="text" id="f-nama" placeholder="Ketik nama santri…" autocomplete="off"
+              oninput="onNamaInput(this.value)" onblur="setTimeout(()=>closeAC(),200)">
+            <div class="ac-list" id="ac-list"></div>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">NISN / Nomor Induk</label>
+          <input type="text" id="f-nisn" placeholder="Isi manual atau auto-fill dari database">
+        </div>
+        <div class="fg">
+          <label class="lbl">NIPD</label>
+          <input type="text" id="f-nipd" placeholder="Isi manual atau auto-fill dari database">
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Kelas Rombel</label>
+          <select id="f-kelas" onchange="onKelasChange(this.value)">
+            <option value="KB-A">KB-A</option>
+            <option value="KB-B">KB-B</option>
+            <option value="TK A-A" selected>TK A-A</option>
+            <option value="TK A-B">TK A-B</option>
+            <option value="TK B-1">TK B-1</option>
+            <option value="TK B-2">TK B-2</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="lbl">Semester</label>
+          <select id="f-semester">
+            <option value="1 (Ganjil)">1 (Ganjil) — Juli–Desember</option>
+            <option value="2 (Genap)" selected>2 (Genap) — Januari–Juni</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Tahun Ajaran</label>
+          <input type="text" id="f-tahun" value="2025/2026">
+        </div>
+        <div class="fg">
+          <label class="lbl">Cabang</label>
+          <select id="f-cabang" onchange="onCabangChange(this.value)">
+            <option value="BSD">BSD</option>
+            <option value="Bintaro">Bintaro</option>
+          </select>
+        </div>
+
+        <div class="fg full">
+          <label class="lbl">Nama Sekolah</label>
+          <input type="text" id="f-sekolah" readonly>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Nama Musyrifah / Wali Kelas</label>
+          <input type="text" id="f-walikelas" placeholder="Nama Musyrifah">
+        </div>
+        <div class="fg">
+          <label class="lbl">NIP / Identitas Musyrifah</label>
+          <input type="text" id="f-nip" placeholder="Nomor identitas">
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Tanggal Pengesahan Rapor</label>
+          <input type="date" id="f-tanggal">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ASSESSMENT (rendered by JS) ── -->
+  <div id="assessment-container"></div>
+
+  <!-- ── PRESENSI ── -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-title">📅 Presensi Kehadiran</div>
+    </div>
+    <div class="card-body">
+      <div class="abs-wrap">
+        <table class="abs-tbl">
+          <tr>
+            <th></th>
+            <th>Sakit</th>
+            <th>Izin</th>
+            <th>Tanpa Keterangan</th>
+          </tr>
+          <tr>
+            <td>MEET CLASS</td>
+            <td><input type="number" id="abs-sakit" min="0" value="0"></td>
+            <td><input type="number" id="abs-izin" min="0" value="0"></td>
+            <td><input type="number" id="abs-alpa" min="0" value="0"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KESIMPULAN ── -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-title"><span class="sec-badge">V</span> Kesimpulan Perkembangan Anak</div>
+    </div>
+    <div class="card-body">
+      <div class="kesim-list">
+        <label class="kesim-opt" id="ko-MB" onclick="setKesimpulan('MB')">
+          <input type="radio" name="kesimpulan" value="MB">
+          <div>
+            <div class="kesim-lbl">🟡 MULAI BERKEMBANG (MB)</div>
+            <div class="kesim-desc">Anak mulai menunjukkan perilaku namun masih memerlukan arahan dan pendampingan.</div>
+          </div>
+        </label>
+        <label class="kesim-opt" id="ko-BCB" onclick="setKesimpulan('BCB')">
+          <input type="radio" name="kesimpulan" value="BCB">
+          <div>
+            <div class="kesim-lbl">🔵 BERKEMBANG CUKUP BAIK (BCB)</div>
+            <div class="kesim-desc">Anak sudah menunjukkan perilaku secara cukup konsisten.</div>
+          </div>
+        </label>
+        <label class="kesim-opt" id="ko-BSB" onclick="setKesimpulan('BSB')">
+          <input type="radio" name="kesimpulan" value="BSB">
+          <div>
+            <div class="kesim-lbl">🟢 BERKEMBANG SANGAT BAIK (BSB)</div>
+            <div class="kesim-desc">Anak mampu menunjukkan perilaku secara mandiri, konsisten, dan dapat menjadi contoh bagi teman.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CATATAN ── -->
+  <div class="card" style="margin-bottom:80px">
+    <div class="card-hdr">
+      <div class="card-hdr-title"><span class="sec-badge">VI</span> Catatan &amp; Rekomendasi Pendidik</div>
+    </div>
+    <div class="card-body">
+      <textarea id="f-catatan" rows="5" placeholder="Tuliskan catatan dan rekomendasi untuk orang tua santri…"></textarea>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <button class="btn btn-outline" onclick="openPreview()">👁 Pratinjau Rapor</button>
+  </div>
+  <button class="btn btn-success" onclick="downloadPDF()">⬇ Unduh PDF</button>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="modal-overlay" id="preview-modal" onclick="onOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title">🔍 Pratinjau Rapor</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="downloadPDF()">⬇ Unduh PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="closePreview()">✕ Tutup</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="preview-a4 pt" id="rapor-preview"></div>
+    </div>
+  </div>
+</div>
+
+<div id="print-area"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const SHEET_ID = '1AUoKQAQ6GSqWW0e05Sf_14Hy7EYa-pkEWD2UVs4rdzw';
+const MUDIROH  = 'Ayu Loka Putranti';
+
+const CABANG = {
+  BSD: {
+    sekolah:'KB-TK TARBIYAH QUR\'ANIYAH',
+    alamat:'Jl. Pena Kencana 1 blok T no. 3A-5 BSD - Tangerang Selatan',
+    telp:'021-75678603', email:'Tarbiyahquraniyah@gmail.com', ig:'@tktaqibsd', kota:'BSD',
+  },
+  Bintaro: {
+    sekolah:'KB-TK TARBIYAH QUR\'ANIYAH',
+    alamat:'Jl. Bintaro Tengah - Tangerang Selatan Blok U3 No.14, Rengas, Kec. Ciputat Timur, Kota Tangerang Selatan, Banten 15412',
+    telp:'', email:'Tarbiyahquraniyah@gmail.com', ig:'@tktaqibintaro', kota:'Bintaro',
+  }
+};
+
+// ══════════════════════════════════════════
+// KURIKULUM
+// ══════════════════════════════════════════
+const KURIKULUM = {
+  KB:{
+    sections:[
+      {id:'I',   title:'URAIAN BIDANG PENGEMBANGAN KEPRIBADIAN ISLAM',  poin:['Akhlak Kepada Guru','Akhlak Kepada Teman','Kemandirian','Kedisiplinan','Karakter Kekhalifahan','Sosial Emosional']},
+      {id:'II',  title:'URAIAN BIDANG PENGETAHUAN TSAQOFAH ISLAM',       poin:["Tahfidz Qur'an","Tahsin Karimah & Al-Qur'an",'Hadits','Doa','Asmaul Husna','Syair Islami']},
+      {id:'III', title:'URAIAN MATERI TARBIYAH DAN UMUM',                poin:['Tauhid : Mengenal Allah','Materi Fiqih','Adab dan Akhlaq','Materi Tema']},
+      {id:'IV',  title:'URAIAN BIDANG PENGEMBANGAN KEMAMPUAN DASAR',     poin:['Kemampuan Bahasa','Kognitif','Motorik','Kreatifitas']},
+    ]
+  },
+  TKA:{
+    sections:[
+      {id:'I',   title:'URAIAN BIDANG PENGEMBANGAN KEPRIBADIAN ISLAM',  poin:['Akhlak Kepada Guru','Akhlak Kepada Teman','Kemandirian','Kedisiplinan','Karakter Kekhalifahan','Sosial Emosional']},
+      {id:'II',  title:'URAIAN BIDANG PENGETAHUAN TSAQOFAH ISLAM',       poin:["Tahfidz Qur'an","Tahsin Karimah & Al-Qur'an",'Hadits','Doa','Dalil','Ibadah Sholat','Bahasa Arab Dan Inggris',"Tadabbur Al-Qur'an","Terjemah Al-Qur'an",'Asmaul Husna']},
+      {id:'III', title:'URAIAN MATERI TARBIYAH DAN UMUM',                poin:['Tauhid : Rukun Islam','Fiqih','Kisah Nabi dan Para Sahabat','Kisah Ilmuwan Muslim dan Sifat Rasulullah ﷺ','Materi Tema']},
+      {id:'IV',  title:'URAIAN BIDANG PENGEMBANGAN KEMAMPUAN DASAR',     poin:['Kemampuan Bahasa','Kognitif','Motorik','Kreatifitas']},
+    ]
+  },
+  TKB:{
+    sections:[
+      {id:'I',   title:'URAIAN BIDANG PENGEMBANGAN KEPRIBADIAN ISLAM',  poin:['Akhlak Kepada Guru','Akhlak Kepada Teman','Kemandirian','Kedisiplinan','Karakter Kekhalifahan','Sosial Emosional']},
+      {id:'II',  title:'URAIAN BIDANG PENGETAHUAN TSAQOFAH ISLAM',       poin:["Tahfidz Qur'an","Tahsin Karimah & Al-Qur'an",'Hadits','Doa','Dalil','Ibadah Sholat','Bahasa Arab Dan Inggris',"Tadabbur Al-Qur'an","Terjemah Al-Qur'an",'Asmaul Husna']},
+      {id:'III', title:'URAIAN MATERI TARBIYAH DAN UMUM',                poin:['Tauhid : Rukun Islam','Fiqih','Kisah Nabi dan Para Sahabat','Kisah Ilmuwan Muslim dan Sifat Rasulullah ﷺ','Materi Tema']},
+      {id:'IV',  title:'URAIAN BIDANG PENGEMBANGAN KEMAMPUAN DASAR',     poin:['Kemampuan Bahasa','Kognitif','Motorik','Kreatifitas']},
+    ]
+  },
+};
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let state = { assessment:[], kesimpulan:'', santriList:[] };
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('f-tanggal').value = new Date().toISOString().split('T')[0];
+  onCabangChange('BSD');
+  onKelasChange('TK A-A');
+  loadSantriFromSheets();
+});
+
+// ══════════════════════════════════════════
+// CABANG / KELAS
+// ══════════════════════════════════════════
+function onCabangChange(val){
+  const c = CABANG[val];
+  if(c) document.getElementById('f-sekolah').value = c.sekolah;
+}
+
+function getKurKey(kelas){
+  if(kelas.startsWith('KB')) return 'KB';
+  if(kelas.startsWith('TK A')) return 'TKA';
+  return 'TKB';
+}
+
+function onKelasChange(kelas){
+  const key = getKurKey(kelas);
+  const newList = [];
+  KURIKULUM[key].sections.forEach(sec => {
+    sec.poin.forEach((nama, idx) => {
+      const ex = state.assessment.find(a => a.nama===nama && a.secId===sec.id);
+      newList.push({ secId:sec.id, secTitle:sec.title, no:idx+1, nama,
+        level: ex?.level||'', evidence: ex?.evidence||'', narasi: ex?.narasi||'', custom:false });
+    });
+    state.assessment.filter(a=>a.secId===sec.id&&a.custom).forEach(a=>newList.push(a));
+  });
+  state.assessment = newList;
+  renderAssessment();
+}
+
+// ══════════════════════════════════════════
+// RENDER ASSESSMENT
+// ══════════════════════════════════════════
+function renderAssessment(){
+  const container = document.getElementById('assessment-container');
+  container.innerHTML = '';
+  const key = getKurKey(document.getElementById('f-kelas').value);
+  KURIKULUM[key].sections.forEach(sec => {
+    const poinList = state.assessment.filter(a=>a.secId===sec.id);
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <div class="card-hdr">
+        <div class="card-hdr-title"><span class="sec-badge">${sec.id}</span>${sec.title}</div>
+      </div>
+      <div class="card-body" id="sb-${sec.id}">
+        ${poinList.map(p=>renderPoin(p)).join('')}
+        <button class="add-poin-btn" onclick="addCustomPoin('${sec.id}','${escQ(sec.title)}')">
+          + Tambah Mata Pelajaran (Muatan Lokal)
+        </button>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function escQ(s){ return s.replace(/'/g,"\\'"); }
+
+function renderPoin(p){
+  const idx = state.assessment.indexOf(p);
+  return `
+  <div class="poin-card" id="pc-${idx}">
+    <div class="poin-card-hdr">
+      <div class="poin-left">
+        <div class="poin-no">${p.no}</div>
+        <div class="poin-title">${p.nama}</div>
+      </div>
+      <button class="del-btn" onclick="deletePoin(${idx})" title="Hapus poin ini">×</button>
+    </div>
+    <div class="poin-body">
+      <div class="poin-body-inner">
+        <div>
+          <div class="field-lbl">Kelayakan Perkembangan</div>
+          <div class="lvl-toggle">
+            <button class="lvl-btn ${p.level==='MB'?'act-MB':''}" onclick="setLevel(${idx},'MB')">MB</button>
+            <button class="lvl-btn ${p.level==='BCB'?'act-BCB':''}" onclick="setLevel(${idx},'BCB')">BCB</button>
+            <button class="lvl-btn ${p.level==='BSB'?'act-BSB':''}" onclick="setLevel(${idx},'BSB')">BSB</button>
+          </div>
+        </div>
+        <div>
+          <div class="field-lbl">Catatan Detail / Evidence</div>
+          <textarea class="ta-evidence" placeholder="Contoh: memberi salam, bertutur sopan, merespons arahan…"
+            oninput="updateField(${idx},'evidence',this.value)">${p.evidence}</textarea>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div class="field-lbl" style="margin-bottom:0">Narasi Rapor</div>
+            <button class="btn-ai" id="ai-btn-${idx}" onclick="generateNarasi(${idx})">✨ Generate AI</button>
+          </div>
+          <textarea class="ta-narasi" id="narasi-ta-${idx}" placeholder="Tulis narasi perkembangan santri (60–120 kata), atau klik ✨ Generate AI…"
+            oninput="updateField(${idx},'narasi',this.value)">${p.narasi}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// STATE MUTATIONS
+// ══════════════════════════════════════════
+function setLevel(idx, level){
+  state.assessment[idx].level = level;
+  const card = document.getElementById(`pc-${idx}`);
+  if(!card) return;
+  card.querySelectorAll('.lvl-btn').forEach(btn=>{
+    btn.className='lvl-btn';
+    if(btn.textContent.trim()===level) btn.classList.add(`act-${level}`);
+  });
+}
+
+function updateField(idx, field, val){ state.assessment[idx][field]=val; }
+
+function setKesimpulan(val){
+  state.kesimpulan = val;
+  ['MB','BCB','BSB'].forEach(k=>{
+    const el = document.getElementById(`ko-${k}`);
+    el.className = 'kesim-opt'+(k===val?` sel-${k}`:'');
+    el.querySelector('input').checked = (k===val);
+  });
+}
+
+function addCustomPoin(secId, secTitle){
+  const nama = prompt('Nama mata pelajaran baru:');
+  if(!nama||!nama.trim()) return;
+  const n = state.assessment.filter(a=>a.secId===secId).length+1;
+  state.assessment.push({ secId, secTitle, no:n, nama:nama.trim(), level:'', evidence:'', narasi:'', custom:true });
+  renderAssessment();
+}
+
+function deletePoin(idx){
+  if(!confirm('Hapus poin ini?')) return;
+  state.assessment.splice(idx,1);
+  renderAssessment();
+}
+
+// ══════════════════════════════════════════
+// AUTOCOMPLETE
+// ══════════════════════════════════════════
+function onNamaInput(val){
+  const list = document.getElementById('ac-list');
+  if(!val||val.length<2){ list.classList.remove('show'); return; }
+  const matches = state.santriList.filter(s=>s.nama.toLowerCase().includes(val.toLowerCase())).slice(0,8);
+  if(!matches.length){ list.classList.remove('show'); return; }
+  list.innerHTML = matches.map(s=>`
+    <div class="ac-item" onmousedown="selectSantri('${escQ(s.nama)}','${s.nisn}','${s.nipd}','${s.kelas}','${s.cabang}')">
+      <div class="ac-name">${s.nama}</div>
+      <div class="ac-sub">${s.nisn} · ${s.kelas} · ${s.cabang}</div>
+    </div>`).join('');
+  list.classList.add('show');
+}
+
+function selectSantri(nama, nisn, nipd, kelas, cabang){
+  document.getElementById('f-nama').value = nama;
+  document.getElementById('f-nisn').value = nisn;
+  document.getElementById('f-nipd').value = nipd;
+  // Auto-set kelas & cabang if they match dropdown options
+  const kelasEl = document.getElementById('f-kelas');
+  for(let o of kelasEl.options){ if(o.value===kelas){ kelasEl.value=kelas; break; } }
+  const cabangEl = document.getElementById('f-cabang');
+  for(let o of cabangEl.options){ if(o.value===cabang){ cabangEl.value=cabang; break; } }
+  onCabangChange(document.getElementById('f-cabang').value);
+  onKelasChange(document.getElementById('f-kelas').value);
+  closeAC();
+}
+
+function closeAC(){ document.getElementById('ac-list').classList.remove('show'); }
+
+// ══════════════════════════════════════════
+// GOOGLE SHEETS
+// ══════════════════════════════════════════
+async function loadSantriFromSheets(){
+  const statusEl = document.getElementById('sheets-status');
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const csv = await res.text();
+    const rows = csv.trim().split('\n').slice(1);
+    state.santriList = rows.map(r=>{
+      // Handle quoted CSV fields
+      const cols = r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)||[];
+      return {
+        id:    (cols[0]||'').replace(/"/g,'').trim(),
+        nama:  (cols[1]||'').replace(/"/g,'').trim(),
+        nisn:  (cols[2]||'').replace(/"/g,'').trim(),
+        nipd:  (cols[3]||'').replace(/"/g,'').trim(),
+        kelas: (cols[4]||'').replace(/"/g,'').trim(),
+        cabang:(cols[5]||'').replace(/"/g,'').trim(),
+      };
+    }).filter(s=>s.nama);
+    statusEl.className='status-pill status-ok';
+    statusEl.innerHTML=`<span class="status-dot" style="background:#22c55e"></span>Sheets Terhubung (${state.santriList.length} santri)`;
+  }catch(e){
+    statusEl.className='status-pill status-warn';
+    statusEl.innerHTML=`<span class="status-dot" style="background:#f59e0b"></span>Sheet belum publik`;
+    console.warn('Sheets fetch error:', e.message);
+  }
+}
+
+// ══════════════════════════════════════════
+// BUILD RAPOR HTML
+// ══════════════════════════════════════════
+function getForm(){
+  return {
+    nama:     document.getElementById('f-nama').value || '___________________',
+    nisn:     document.getElementById('f-nisn').value || '___________________',
+    nipd:     document.getElementById('f-nipd').value || '',
+    kelas:    document.getElementById('f-kelas').value,
+    semester: document.getElementById('f-semester').value,
+    tahun:    document.getElementById('f-tahun').value || '2025/2026',
+    cabang:   document.getElementById('f-cabang').value,
+    tanggal:  document.getElementById('f-tanggal').value,
+    walikelas:document.getElementById('f-walikelas').value || '___________________',
+    nip:      document.getElementById('f-nip').value,
+    sakit:    document.getElementById('abs-sakit').value||'0',
+    izin:     document.getElementById('abs-izin').value||'0',
+    alpa:     document.getElementById('abs-alpa').value||'0',
+    catatan:  document.getElementById('f-catatan').value,
+  };
+}
+
+function fmtDate(s){
+  if(!s) return '____________________';
+  return new Date(s).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+}
+
+function levelLabel(kelas){
+  if(kelas.startsWith('KB')) return 'KB';
+  if(kelas.startsWith('TK A')) return 'TK A';
+  return 'TK B';
+}
+
+function semPeriod(sem){
+  return (sem.includes('1')||sem.includes('Ganjil')) ? 'JULI – DESEMBER' : 'JANUARI – JUNI';
+}
+
+function buildRaporHTML(data){
+  const c = CABANG[data.cabang]||CABANG.BSD;
+  const lvl = levelLabel(data.kelas);
+  const semYear = data.tahun.split('/')[data.semester.includes('1')?0:1] || data.tahun.split('/')[0];
+
+  // Group by section (preserve order)
+  const secMap = {};
+  const secOrder = [];
+  state.assessment.forEach(p=>{
+    if(!secMap[p.secId]){ secMap[p.secId]={title:p.secTitle,poin:[]}; secOrder.push(p.secId); }
+    secMap[p.secId].poin.push(p);
+  });
+
+  // Build assessment tables
+  let assessHTML = '';
+  secOrder.forEach(secId=>{
+    const sec = secMap[secId];
+    let rows = '';
+    sec.poin.forEach(p=>{
+      rows += `
+        <tr class="pt-poin-hdr"><td class="pt-poin-no"></td><td><strong>${p.nama}</strong></td></tr>
+        <tr><td class="pt-poin-no">${p.no}</td><td class="pt-narasi">${p.narasi||'&nbsp;'}</td></tr>`;
+    });
+    assessHTML += `
+      <table class="pt-tbl">
+        <tr>
+          <td class="pt-sec-no pt-sec-hdr" style="width:24px">${secId}</td>
+          <td class="pt-sec-hdr">${sec.title}</td>
+        </tr>
+        ${rows}
+      </table>`;
+  });
+
+  const chk = (k) => state.kesimpulan===k ? '✓' : '';
+
+  return `
+  <!-- KOP SURAT -->
+  <div class="pt-hdr">
+    <div class="pt-logo">TQ<br><span style="font-size:8pt">TPQ</span></div>
+    <div class="pt-school-info">
+      <div class="pt-bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
+      <div class="pt-sname">KB-TK Tarbiyah Qur'aniyah</div>
+      <div class="pt-saddr">
+        ${c.alamat}${c.telp ? '<br>Telefon: '+c.telp : ''}<br>
+        Email : ${c.email} &nbsp;–&nbsp; Instagram : ${c.ig}
+      </div>
+    </div>
+  </div>
+
+  <!-- JUDUL -->
+  <div class="pt-title">
+    <div class="pt-title-main">PENILAIAN PERKEMBANGAN SANTRI ${lvl}</div>
+    <div class="pt-title-sub">BULAN ${semPeriod(data.semester)} ${semYear} (${data.semester})</div>
+  </div>
+
+  <!-- IDENTITAS SANTRI -->
+  <div class="pt-sinfo">
+    <div class="pt-si"><span class="pt-si-key">NAMA SANTRI</span><span>: ${data.nama}</span></div>
+    <div class="pt-si"><span class="pt-si-key">NOMOR INDUK</span><span>: ${data.nisn}</span></div>
+    <div class="pt-si"><span class="pt-si-key">KELAS</span><span>: ${data.kelas}</span></div>
+    <div class="pt-si"><span class="pt-si-key">TAHUN AJARAN</span><span>: ${data.tahun}</span></div>
+  </div>
+
+  <!-- ASSESSMENT -->
+  ${assessHTML}
+
+  <!-- ABSENSI -->
+  <div class="pt-abs-wrap">
+    <table class="pt-abs-tbl">
+      <tr>
+        <th style="text-align:left;padding-left:8px"></th>
+        <th>Sakit</th><th>Izin</th><th>Tanpa Keterangan</th>
+      </tr>
+      <tr>
+        <td>MEET CLASS</td>
+        <td>${data.sakit}</td><td>${data.izin}</td><td>${data.alpa}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- KESIMPULAN + CATATAN (tabel bersatu dengan rowspan) -->
+  <table class="pt-tbl" style="margin-bottom:10px">
+    <!-- Baris header Kesimpulan -->
+    <tr>
+      <td class="pt-sec-hdr" rowspan="4" style="width:24px;text-align:center;vertical-align:middle">V</td>
+      <td class="pt-sec-hdr" colspan="3" style="text-align:center">KESIMPULAN PERKEMBANGAN ANAK</td>
+    </tr>
+    <!-- 3 baris level dengan "Tingkat Pencapaian" merge 3 baris -->
+    <tr>
+      <td rowspan="3" style="width:130px;text-align:center;vertical-align:middle;font-size:9.5pt">Tingkat<br>Pencapaian<br>Perkembangan</td>
+      <td style="font-size:9.5pt">MULAI BERKEMBANG</td>
+      <td style="width:40px;text-align:center;font-size:11pt">${chk('MB')}</td>
+    </tr>
+    <tr>
+      <td style="font-size:9.5pt">BERKEMBANG CUKUP BAIK</td>
+      <td style="text-align:center;font-size:11pt">${chk('BCB')}</td>
+    </tr>
+    <tr>
+      <td style="font-size:9.5pt">BERKEMBANG SANGAT BAIK</td>
+      <td style="text-align:center;font-size:11pt">${chk('BSB')}</td>
+    </tr>
+    <!-- Section VI header -->
+    <tr>
+      <td class="pt-sec-hdr" style="text-align:center;vertical-align:middle">VI</td>
+      <td class="pt-sec-hdr" colspan="3" style="text-align:center">CATATAN DAN REKOMENDASI PENDIDIK</td>
+    </tr>
+    <!-- Catatan content -->
+    <tr>
+      <td></td>
+      <td colspan="3" style="min-height:80px;padding:6px 8px;font-size:9.5pt;line-height:1.65">${data.catatan||'&nbsp;'}</td>
+    </tr>
+  </table>
+
+  <!-- TANGGAL & TTD -->
+  <div class="pt-sign-date">${c.kota}, ${fmtDate(data.tanggal)}</div>
+  <table class="pt-sign-tbl">
+    <tr>
+      <td>
+        <div style="font-size:9pt">Mudiroh</div>
+        <div class="pt-sign-space"></div>
+        <div class="pt-sign-name">${MUDIROH}</div>
+      </td>
+      <td>
+        <div style="font-size:9pt">Musyrifah / Wali Kelas</div>
+        <div class="pt-sign-space"></div>
+        <div class="pt-sign-name">${data.walikelas}</div>
+        ${data.nip ? `<div class="pt-sign-role">NIP. ${data.nip}</div>` : ''}
+      </td>
+      <td>
+        <div style="font-size:9pt">Orang Tua / Wali Santri</div>
+        <div class="pt-sign-space"></div>
+        <div class="pt-sign-name">&nbsp;</div>
+      </td>
+    </tr>
+  </table>`;
+}
+
+// ══════════════════════════════════════════
+// PREVIEW MODAL
+// ══════════════════════════════════════════
+function openPreview(){
+  document.getElementById('rapor-preview').innerHTML = buildRaporHTML(getForm());
+  document.getElementById('preview-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closePreview(){
+  document.getElementById('preview-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function onOverlayClick(e){
+  if(e.target===document.getElementById('preview-modal')) closePreview();
+}
+
+// ══════════════════════════════════════════
+// PDF DOWNLOAD
+// ══════════════════════════════════════════
+function downloadPDF(){
+  const data = getForm();
+  // Build rapor in a temp wrapper
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pt';
+  wrapper.style.cssText = 'width:170mm;font-family:Times New Roman,serif;font-size:10pt;color:#000;background:#fff;padding:0';
+  wrapper.innerHTML = buildRaporHTML(data);
+  document.body.appendChild(wrapper);
+
+  // Apply inline styles for html2canvas (tables, etc.)
+  wrapper.querySelectorAll('table').forEach(t=>{ t.style.borderCollapse='collapse'; t.style.width=t.className.includes('pt-sign-tbl')?'100%':t.style.width; });
+  wrapper.querySelectorAll('td,th').forEach(el=>{ if(!el.style.border) el.style.border='1px solid #000'; });
+
+  const nama = document.getElementById('f-nama').value || 'Santri';
+  const sem  = data.semester.replace(/\s/g,'');
+  const tahun= data.tahun;
+
+  html2pdf().set({
+    margin: [10,12,10,12],
+    filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
+    image: { type:'jpeg', quality:0.97 },
+    html2canvas: { scale:2, useCORS:true, letterRendering:true },
+    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+  }).from(wrapper).save().then(()=>{ document.body.removeChild(wrapper); });
+}
+
+// ══════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════
+function clearForm(){
+  if(!confirm('Reset semua data?')) return;
+  ['f-nama','f-nisn','f-nipd','f-walikelas','f-nip','f-catatan'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('f-nisn').readOnly=true;
+  document.getElementById('f-nipd').readOnly=true;
+  document.getElementById('f-tahun').value='2025/2026';
+  document.getElementById('abs-sakit').value='0';
+  document.getElementById('abs-izin').value='0';
+  document.getElementById('abs-alpa').value='0';
+  state.kesimpulan='';
+  ['MB','BCB','BSB'].forEach(k=>{
+    document.getElementById(`ko-${k}`).className='kesim-opt';
+    document.getElementById(`ko-${k}`).querySelector('input').checked=false;
+  });
+  state.assessment.forEach(p=>{ p.level=''; p.evidence=''; p.narasi=''; });
+  renderAssessment();
+}
+
+// ══════════════════════════════════════════
+// LOAD CONTOH DATA (Faiza Az Zahra)
+// ══════════════════════════════════════════
+function loadContoh(){
+  document.getElementById('f-nama').value='Faiza Az Zahra';
+  document.getElementById('f-nisn').value='2024.TK-BIN.011';
+  document.getElementById('f-nipd').value='0092837482';
+  document.getElementById('f-kelas').value='KB-A';
+  document.getElementById('f-semester').value='2 (Genap)';
+  document.getElementById('f-tahun').value='2024/2025';
+  document.getElementById('f-cabang').value='Bintaro';
+  document.getElementById('f-tanggal').value='2025-06-20';
+  document.getElementById('f-walikelas').value='U. Purwati';
+  document.getElementById('f-nip').value='198904122013112002';
+  onCabangChange('Bintaro');
+  onKelasChange('KB-A');
+  document.getElementById('abs-sakit').value='0';
+  document.getElementById('abs-izin').value='4';
+  document.getElementById('abs-alpa').value='0';
+  setKesimpulan('BSB');
+  document.getElementById('f-catatan').value='Alhamdulillah Ananda Rara pada semester dua secara umum berkembang dengan sangat baik, yaitu pada aspek kepribadian islami, tsaqofah islam, materi Tarbiyah dan umum serta pengembangan kemampuan dasar. Harapan kami kedepannya Ananda lebih istiqomah lagi dalam memurojaah, seperti hafalan hadits, doa, Asmaul Husna, serta materi-materi lain yang sudah dipelajari supaya lebih lancar lagi. Selamat ya, Ananda Rara naik ke TK A. Allahumma barik anak shalihah.';
+
+  const narasi = {
+    'Akhlak Kepada Guru':       {level:'BSB',evidence:'memberi salam, bertutur sopan, merespons arahan',narasi:'Alhamdulillah Ananda Rara menunjukkan sikap yang baik terhadap Musyrifah. Ananda selalu memberi salam saat bertemu Musyrifah, bertutur kata yang baik seperti "tolong", "terima kasih", dan "maaf", serta dapat merespon dengan baik arahan dari Musyrifah. Semoga Ananda Rara senantiasa berakhlak baik dengan Musyrifah ataupun guru lainnya.'},
+    'Akhlak Kepada Teman':      {level:'BSB',evidence:'ramah, berbagi mainan, mengajak bermain bersama',narasi:'Alhamdulillah Ananda Rara anak baik, mampu bersikap baik terhadap teman, peduli dan mau berbagi dengan teman, bersikap ramah serta bertutur kata baik, senang mengajak bermain bersama, dan sayang terhadap teman-temannya. Semoga Ananda Rara senantiasa berakhlak baik dengan temannya baik di lingkungan sekolah maupun di luar sekolah.'},
+    'Kemandirian':              {level:'BSB',evidence:'memakai sepatu sendiri, meletakkan tas di rak, makan mandiri',narasi:'Alhamdulillah Ananda Rara mampu melakukan aktivitas sehari-hari secara mandiri seperti, memakai sepatu dan meletakkannya di rak sepatu, meletakkan tas di rak, mencuci tangan, makan dan merapihkan peralatan makan-minum sendiri. Semoga Ananda Rara kedepannya semakin mandiri dalam menyelesaikan tugas-tugas hingga selesai.'},
+    'Kedisiplinan':             {level:'BCB',evidence:'tertib berseragam, rapi berbaris, buang sampah pada tempatnya',narasi:'Alhamdulillah Ananda Rara anak yang tertib, seperti tertib dalam mengenakan seragam sekolah, berbaris, ketika mengikuti kegiatan belajar baik di dalam maupun di luar kelas, membuang sampah pada tempatnya. Harapan kami kedepannya Ananda dapat lebih tertib dan istiqomah seperti membereskan perlengkapan sekolah selesai melakukannya tanpa diberitahu dari Musyrifah.'},
+    'Karakter Kekhalifahan':    {level:'BSB',evidence:'berani maju ke depan kelas, memimpin berbaris',narasi:"Alhamdulillah pada semester ini Ananda Rara sudah mampu menunjukkan sikap kekhalifahan seperti, berani memberi nasihat dan mengajak temannya untuk berbuat baik. Ananda juga berani maju ke depan kelas pada berbaris maupun tampil pada saat acara. Semoga Ananda Rara dapat meningkatkan lagi karakter kekhalifahannya seperti yang dicontohkan oleh Rasulullah Shalallahu'alaihi Wa Sallam dan para sahabatnya."},
+    'Sosial Emosional':         {level:'BSB',evidence:'mampu mengungkapkan emosi dengan baik (senang, sedih, antusias)',narasi:'Alhamdulillah Ananda Rara menunjukkan perkembangan sosial-emosional yang baik. Ananda mampu bersosialisasi dengan baik terhadap teman-teman dan Musyrifah. Ananda juga mampu mengungkapkan emosinya dengan baik sesuai dengan kondisi yang ada seperti "senang-sedih-antusias". Semoga Ananda Rara bisa menjaga kestabilan sosial emosionalnya baik di lingkungan sekolah maupun di luar lingkungan sekolah.'},
+    "Tahfidz Qur'an":           {level:'BSB',evidence:'lancar menghafal Qs Al Falaq sampai Qs Al Ikhlas',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal Qs Al Falaq sampai dengan Qs. Al Ikhlas dengan lancar dan sedang proses menghafal Qs. Al Lahab ayat 1-3. Supaya hafalannya tetap terjaga dan lebih mutqin lagi, alangkah baiknya jika Ananda senantiasa istiqomah dalam memurojaah. Semoga Ananda Rara selalu istiqomah dalam murajaah dan lebih semangat lagi dalam menambah hafalannya."},
+    "Tahsin Karimah & Al-Qur'an":{level:'BSB',evidence:'karimah Bab 1 halaman 4-16 lancar, sedang proses halaman 17',narasi:"Alhamdulillah untuk tahsin karimah pada semester ini, Ananda Rara telah sampai pada karimah Bab. 1 halaman 4-16 dengan lancar dan sedang proses membaca halaman 17 baris 1-2 dengan cukup lancar. Semoga kedepannya Ananda selalu semangat dalam belajar karimah dan Allah berikan kemudahan kepada Ananda dalam mempelajari Al-Quran."},
+    'Hadits':                   {level:'BCB',evidence:'hafal hadits tersenyum HR At Tirmidzi',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal hadits tersenyum (HR. At Tirmidzi) dengan cukup lancar dan sedikit bimbingan. Semoga Ananda Rara senantiasa istiqomah dalam muraja'ah hadits-hadits yang sudah dipelajari dan mampu mengamalkannya."},
+    'Doa':                      {level:'BCB',evidence:'lancar menghafal doa harian seperti ikrar syahadat, doa belajar',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal dengan lancar doa-doa harian seperti, ikrar syahadat, doa belajar, doa berbuka puasa, dan doa sebelum tidur dengan cukup lancar dan sedikit bimbingan. Semoga Ananda Rara dapat selalu mengamalkan doa-doa yang sudah dipelajari dalam keseharian."},
+    'Asmaul Husna':             {level:'BSB',evidence:'hafal Ar-Rahman sampai As Sami dengan lancar',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal Asmaul Husna dari (Ar-Rahman - As Sami) dengan lancar. Semoga Ananda Rara selalu istiqomah dalam menghafal, memurajaah Asmaul Husna yang sudah dihafalnya dan semangat untuk menambah hafalan Asmaul Husna yang lain beserta gerakannya."},
+    'Syair Islami':             {level:'BSB',evidence:'hafal syair bagian tumbuhan, adab berbicara, tepuk wudhu',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal syair-syair islami seperti syair bagian-bagian tumbuhan, adab berbicara, syair tegakkan sholat, syair nama-nama bulan Hijriyah, tepuk wudhu, dan tepuk puasa dengan lancar. Semoga Ananda Rara selalu istiqomah dalam menghafal dan memurajaah syair-syair islami yang sudah dihafalkan."},
+    'Tauhid : Mengenal Allah':  {level:'BSB',evidence:'mempelajari ragam tumbuhan ciptaan Allah, nama bulan Hijriyah',narasi:"Alhamdulillah Ananda Rara telah mempelajari dan mengenal materi mengenai ragam tumbuhan ciptaan Allah dengan baik. Ananda juga sudah mempelajari dan mampu menghafal nama-nama bulan Hijriyah melalui syair islami dengan lancar. Semoga Ananda selalu semangat dalam memurojaah materi yang sudah dipelajari."},
+    'Materi Fiqih':             {level:'BSB',evidence:'nama sholat wajib, tata cara wudhu, tata cara ibadah haji',narasi:"Alhamdulillah Ananda Rara telah mempelajari materi-materi fiqih dengan baik, diantaranya nama-nama sholat wajib, waktu sholat, rekaat sholat, tata cara sholat dari wudhu, dzikir, berdoa, tentang apa itu puasa, apa itu wudhu dan caranya, dan tata cara ibadah haji. Semoga materi yang sudah dipelajari dapat memberikan pengetahuan dan bermanfaat dalam kehidupan sehari-hari."},
+    'Adab dan Akhlaq':          {level:'BSB',evidence:'mempelajari adab puasa dan adab tidur',narasi:"Alhamdulillah Ananda Rara sudah mempelajari adab-adab dan mempraktekkannya dengan baik, seperti adab puasa dan adab tidur. Semoga kedepannya Ananda Rara dapat menerapkan adab-adab yang sudah dipelajari dalam kehidupan sehari-hari."},
+    'Materi Tema':              {level:'BSB',evidence:'bagian tumbuhan, binatang ternak, kendaraan darat',narasi:"Alhamdulillah Ananda Rara telah mempelajari dan mengenal dengan baik tentang bagian-bagian tumbuhan, mengenal ragam binatang ternak, manfaat binatang ternak, macam-macam kendaraan darat, dan fungsi kendaraan darat. Ananda mampu menjawab dengan benar setiap pertanyaan dari Musyrifah. Semoga materi yang sudah dipelajari dapat memberikan pengetahuan dan bermanfaat dalam kehidupan sehari-hari."},
+    'Kemampuan Bahasa':         {level:'BSB',evidence:'mengungkapkan keinginan, berkomunikasi baik, menceritakan kembali',narasi:"Alhamdulillah kemampuan berbahasa Ananda Rara berkembang dengan sangat baik. Ananda mampu mengungkapkan keinginannya, meminta tolong, berkomunikasi dengan bahasa yang baik, berbagi cerita tentang kegiatan sehari-hari, menyimak tayangan beredukasi dan mampu menceritakan kembali. Semoga kedepannya Ananda Rara bisa terus meningkatkan keterampilannya dalam berbahasa."},
+    'Kognitif':                 {level:'BSB',evidence:'mengenal angka 1-15, huruf konsonan B-G, huruf vokal',narasi:"Alhamdulillah, kemampuan kognitif Ananda Rara berkembang dengan baik. Ananda Rara sudah mampu mengenal dan mempelajari angka 1-15. Ananda sudah mampu berhitung dan menyebutkan simbol angka 1-15 dengan sangat baik. Ananda juga sudah mengenal dan mempelajari huruf konsonan B-G dan huruf vokal (a, i, u, e, o). Semoga Ananda Rara terus semangat dan diberi kemudahan dalam mengasah kemampuan kognitifnya."},
+    'Motorik':                  {level:'BSB',evidence:'mewarnai, meronce, kolase, gerakan asmaul husna, panahan',narasi:"Alhamdulillah perkembangan motorik kasar dan motorik halus Ananda Rara berkembang dengan baik. Dalam aspek motorik kasar, Ananda terampil dalam menggerakkan tangan kanan dan tangan kiri melalui ice breaking, gerakan Asmaul Husna, serta saat fun game seperti panahan. Dalam aspek motorik halus, Ananda Rara mampu mewarnai dan melukis menggunakan krayon serta kuas, meronce, membuat kolase dengan baik. Semoga Ananda Rara tetap semangat dan diberi kemudahan dalam melatih keterampilan gerak tubuhnya."},
+    'Kreatifitas':              {level:'BSB',evidence:'membuat vegetable garden, domba, hiasan nama bulan Hijriyah',narasi:"Alhamdulillah Ananda Rara sangat antusias dalam kegiatan berkreasi seperti, membuat vegetable garden, membuat domba, membuat hiasan nama-nama bulan Hijriyah, membuat jadwal waktu sholat, membuat kartu ucapan menyambut Ramadhan. Semoga Ananda Rara tetap semangat meningkatkan keterampilan kreativitasnya."},
+  };
+
+  state.assessment.forEach(p=>{ const n=narasi[p.nama]; if(n){ p.level=n.level; p.evidence=n.evidence; p.narasi=n.narasi; } });
+  renderAssessment();
+}
+
+// ══════════════════════════════════════════
+// AI NARASI GENERATION
+// ══════════════════════════════════════════
+async function generateNarasi(idx) {
+  const p = state.assessment[idx];
+  if (!p.level) {
+    alert('Pilih dulu level perkembangan (MB / BCB / BSB) sebelum generate AI.');
+    return;
+  }
+
+  const btn = document.getElementById(`ai-btn-${idx}`);
+  const ta  = document.getElementById(`narasi-ta-${idx}`);
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating…';
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        poin:       p.nama,
+        level:      p.level,
+        evidence:   p.evidence,
+        namaSantri: document.getElementById('f-nama').value || 'Santri',
+        kelas:      document.getElementById('f-kelas').value,
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Terjadi kesalahan');
+
+    p.narasi  = data.narasi;
+    ta.value  = data.narasi;
+  } catch(e) {
+    alert('Gagal generate narasi: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ Generate AI';
+  }
+}
+</script>
+</body>
+</html>
