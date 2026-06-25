@@ -662,7 +662,7 @@ function closeAC(){ document.getElementById('ac-list').classList.remove('show');
 // ══════════════════════════════════════════
 async function loadSantriFromSheets(){
   const statusEl = document.getElementById('sheets-status');
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=544298237`;
   try{
     const res = await fetch(url);
     if(!res.ok) throw new Error('HTTP '+res.status);
