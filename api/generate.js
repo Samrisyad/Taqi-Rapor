@@ -1,4 +1,4 @@
-// api/generate.js â TaQi Rapor AI Narasi Generator
+// api/generate.js — TaQi Rapor AI Narasi Generator
 
 const NARRATIVE_CONTEXT = {
   "AKHLAK GURU": {
@@ -42,9 +42,9 @@ const NARRATIVE_CONTEXT = {
     BSB: { a:"MasyaAllah Ananda menunjukkan kemampuan membaca Al-Qur'an yang sangat baik. memorization_or_mastery: mampu membaca materi tahsin dengan lancar dan sesuai kaidah yang dipelajari.", e:"makhraj baik memperhatikan hukum bacaan mampu memperbaiki kesalahan secara mandiri", h:"Semoga Allah menjadikan bacaan Al-Qur'an Ananda semakin indah dan penuh keberkahan. TAQI_NARRATIVE_BLOCKS_V2" },
   },
   "HADITS": {
-    MB: { a:"Alhamdulillah Ananda mulai mengenal hadits-hadits pilihan yang dipelajari. memorization_or_mastery: mampu mengikuti pembacaan hadits dan menghafal sebagian lafadz yang diajarkan.", e:"mengikuti muroja'ah hadits bersama mulai mengingat lafadz hadits masih memerlukan pengulangan yang konsisten", h:"Semoga Allah memudahkan Ananda dalam menghafal dan mengamalkan hadits-hadits Rasulullah ï·º dalam kehidupan sehari-hari." },
-    BCB: { a:"Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam hafalan hadits. memorization_or_mastery: mampu menghafal hadits target semester dengan cukup baik.", e:"menghafal lafadz hadits dengan cukup lancar mengikuti muroja'ah dengan baik mulai memahami makna sederhana dari hadits", h:"Semoga Allah menjadikan hadits Rasulullah ï·º sebagai pedoman dalam kehidupan Ananda." },
-    BSB: { a:"MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam hafalan hadits. memorization_or_mastery: mampu menghafal dan menyampaikan hadits dengan lancar.", e:"hafalan kuat dan stabil mampu mengikuti tasmi' hadits dengan baik menunjukkan usaha mengamalkan pesan hadits", h:"Semoga Allah menjadikan Ananda generasi yang mencintai sunnah Rasulullah ï·º." },
+    MB: { a:"Alhamdulillah Ananda mulai mengenal hadits-hadits pilihan yang dipelajari. memorization_or_mastery: mampu mengikuti pembacaan hadits dan menghafal sebagian lafadz yang diajarkan.", e:"mengikuti muroja'ah hadits bersama mulai mengingat lafadz hadits masih memerlukan pengulangan yang konsisten", h:"Semoga Allah memudahkan Ananda dalam menghafal dan mengamalkan hadits-hadits Rasulullah ﷺ dalam kehidupan sehari-hari." },
+    BCB: { a:"Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam hafalan hadits. memorization_or_mastery: mampu menghafal hadits target semester dengan cukup baik.", e:"menghafal lafadz hadits dengan cukup lancar mengikuti muroja'ah dengan baik mulai memahami makna sederhana dari hadits", h:"Semoga Allah menjadikan hadits Rasulullah ﷺ sebagai pedoman dalam kehidupan Ananda." },
+    BSB: { a:"MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam hafalan hadits. memorization_or_mastery: mampu menghafal dan menyampaikan hadits dengan lancar.", e:"hafalan kuat dan stabil mampu mengikuti tasmi' hadits dengan baik menunjukkan usaha mengamalkan pesan hadits", h:"Semoga Allah menjadikan Ananda generasi yang mencintai sunnah Rasulullah ﷺ." },
   },
   "DOA": {
     MB: { a:"Alhamdulillah Ananda mulai mengenal doa-doa harian yang dipelajari. memorization_or_mastery: mampu mengikuti pembacaan doa dan menghafal sebagian lafadz.", e:"mengikuti muroja'ah doa bersama mulai mengingat lafadz doa sederhana masih memerlukan bimbingan dalam pelafalan", h:"Semoga Allah menumbuhkan kecintaan Ananda untuk selalu mengingat-Nya melalui doa." },
@@ -129,7 +129,7 @@ const POIN_DOMAIN_MAP = {
   'Ibadah Sholat': 'IBADAH SHOLAT',
   'Bahasa Arab Dan Inggris': 'BAHASA ARAB',
   'Tadabbur Al-Qur\'an': 'TADABBUR',
-  'Terjemah Al-Qur\'an': 'TERJEMAH QUR'AN',
+  'Terjemah Al-Qur\'an': "TERJEMAH QUR'AN",
   'Tauhid : Mengenal Allah': 'TAUHID',
   'Tauhid : Rukun Islam': 'TAUHID',
   'Materi Fiqih': 'MATERI FIKIH',
@@ -137,7 +137,7 @@ const POIN_DOMAIN_MAP = {
   'Adab dan Akhlaq': 'AKHLAK GURU',
   'Materi Tema': 'MATERI TEMA',
   'Kisah Nabi dan Para Sahabat': 'KISAH NABI',
-  'Kisah Ilmuwan Muslim dan Sifat Rasulullah Ã·': 'KISAH TELADAN',
+  'Kisah Ilmuwan Muslim dan Sifat Rasulullah ÷': 'KISAH TELADAN',
 };
 
 export default async function handler(req, res) {
@@ -180,19 +180,19 @@ Gunakan pola di atas sebagai INSPIRASI gaya dan tone, namun WAJIB sesuaikan deng
 
   const prompt = `Kamu adalah Musyrifah senior di KB-TK Tarbiyah Qur'aniyah (TaQi), sekolah Islam berbasis karakter Qur'ani. Tugasmu menulis narasi rapor perkembangan santri yang hangat, personal, dan Islami.
 
-TAQI NARRATIVE DNA â pola wajib:
-PENCAPAIAN â BUKTI NYATA â INSIGHT PERKEMBANGAN â HARAPAN & DOA
+TAQI NARRATIVE DNA — pola wajib:
+PENCAPAIAN → BUKTI NYATA → INSIGHT PERKEMBANGAN → HARAPAN & DOA
 
 ATURAN PENULISAN:
 1. Mulai dengan "Alhamdulillah" (MB/BCB) atau "MasyaAllah" (BSB)
-2. Panjang: 60â120 kata â tidak lebih, tidak kurang
+2. Panjang: 60–120 kata — tidak lebih, tidak kurang
 3. DILARANG kata: kurang, lemah, gagal, buruk, tidak bisa, belum mampu, masih kesulitan
 4. Hal yang perlu ditingkatkan: ungkapkan HANYA sebagai harapan/doa di akhir
-5. Tutup dengan "Semogaâ¦" atau kalimat doa
-6. Bahasa: hangat, apresiatif, observatif â seperti Musyrifah yang menyayangi santrinya
+5. Tutup dengan "Semoga…" atau kalimat doa
+6. Bahasa: hangat, apresiatif, observatif — seperti Musyrifah yang menyayangi santrinya
 7. Sebut santri dengan "Ananda [nama pertama]"
 8. Boleh sebut nama Allah, Rasulullah, atau referensi Islami yang relevan
-9. Jangan terdengar seperti mesin â harus terdengar seperti Musyrifah TaQi${patternBlock}
+9. Jangan terdengar seperti mesin — harus terdengar seperti Musyrifah TaQi${patternBlock}
 
 DATA SANTRI:
 - Nama: ${namaSantri}
