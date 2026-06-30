@@ -130,16 +130,6 @@ textarea{resize:vertical}
 .kesim-lbl{font-weight:700;font-size:13px}
 .kesim-desc{font-size:11px;color:var(--gray-500);margin-top:2px}
 
-/* ── PRINT / PDF ── */
-@media print {
-  body > *:not(#pdf-print-area) { display:none !important; }
-  #pdf-print-area { display:block !important; font-family:'Times New Roman',Times,serif; font-size:10pt; color:#000; }
-  #pdf-print-area table { border-collapse:collapse !important; width:100% !important; }
-  #pdf-print-area td, #pdf-print-area th { border:1px solid #000 !important; }
-  @page { margin:0.54mm 6mm; size:A4 portrait; }
-}
-@media screen { #pdf-print-area { display:none; } }
-
 /* ── BOTTOM BAR ── */
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid var(--gray-200);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:150;box-shadow:0 -4px 12px rgba(0,0,0,.08)}
 .bottom-bar-left{display:flex;align-items:center;gap:10px}
@@ -180,7 +170,6 @@ textarea{resize:vertical}
 .pt-tbl th{border:1px solid #000;padding:3px 6px}
 
 .pt-sec-hdr{background:#3a3a3a;color:#fff;font-weight:700;font-size:9.5pt;vertical-align:middle;text-align:center}
-.pt-sec-break{page-break-before:always;break-before:page}
 .pt-sec-no{width:24px;text-align:center;vertical-align:middle;font-weight:700}
 .pt-poin-hdr td{font-weight:700;background:#f0f0f0;font-size:9.5pt}
 .pt-poin-no{width:24px;text-align:center;vertical-align:middle}
@@ -199,76 +188,40 @@ textarea{resize:vertical}
 .pt-sign-name{font-weight:700;border-top:1px solid #000;padding-top:3px;margin-top:0}
 .pt-sign-role{font-size:8.5pt;margin-top:1px}
 
+/* ── PRINT ── */
+@media print{body>*{display:none!important}#print-area{display:block!important}}
+#print-area{display:none}
+
 /* ── MOBILE ── */
 @media(max-width:640px){
-  /* Layout */
   .page{padding:12px 12px 100px}
   .grid2,.grid3{grid-template-columns:1fr}
-
-  /* Header */
   .hdr{padding:8px 14px}
   .hdr-title{font-size:13px}
   .hdr-sub{display:none}
   .btn span{display:none}
   .hdr-logo{width:30px;height:30px;font-size:9px}
-
-  /* Bottom bar — full-width buttons */
   .bottom-bar{padding:10px 12px;gap:8px}
   .bottom-bar-left{flex:1}
   .bottom-bar-left .btn{flex:1;justify-content:center;min-height:44px}
   .bottom-bar .btn-success{flex:1;justify-content:center;min-height:44px}
-
-  /* Cards */
   .card-hdr{padding:10px 13px}
   .card-body{padding:12px}
-
-  /* Inputs — font-size:16px prevents iOS auto-zoom on focus */
   input,select,textarea{font-size:16px}
   .btn-ai{font-size:12px;padding:8px 12px;min-height:38px}
-
-  /* Level toggle */
   .lvl-toggle{gap:4px}
   .lvl-btn{padding:10px 4px;font-size:12px;min-height:44px}
-
-  /* Poin card */
   .poin-card-hdr{flex-wrap:wrap;gap:6px}
   .poin-left{flex:1;min-width:0}
   .poin-title{font-size:12px;word-break:break-word}
-
-  /* Absensi — horizontal scroll */
   .abs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-
-  /* ── PREVIEW MODAL — full screen + scale content to fit ── */
   .modal-overlay{padding:0}
   .modal-box{border-radius:0;min-height:100dvh;display:flex;flex-direction:column}
   .modal-hdr{padding:10px 14px;flex-shrink:0}
   .modal-hdr .modal-title{font-size:13px}
-  .modal-body{
-    padding:0;
-    flex:1;
-    overflow-y:auto;
-    overflow-x:hidden;
-    background:#e5e7eb;
-    display:flex;
-    justify-content:center;
-    align-items:flex-start;
-  }
-  /* Scale the A4 preview to fit mobile screen width.
-     zoom: approx screenWidth / 720px (preview natural width).
-     Using 0.48 targets ~375px phones (375/720≈0.52 minus gutters). */
-  .preview-a4{
-    zoom:0.48;
-    width:720px;
-    max-width:none;
-    padding:10mm 10mm;
-    box-shadow:none;
-    margin:8px auto;
-  }
-
-  /* AI narasi textarea */
+  .modal-body{padding:0;flex:1;overflow-y:auto;overflow-x:hidden;background:#e5e7eb;display:flex;justify-content:center;align-items:flex-start}
+  .preview-a4{zoom:0.48;width:720px;max-width:none;padding:10mm 10mm;box-shadow:none;margin:8px auto}
   .ta-narasi{min-height:80px}
-
-  /* Section headers — allow text wrap */
   .sec-hdr{flex-wrap:wrap;gap:4px}
 }
 </style>
@@ -447,9 +400,6 @@ textarea{resize:vertical}
   </div>
 
 </div><!-- /page -->
-
-<!-- PRINT AREA (hidden on screen, visible only when printing) -->
-<div id="pdf-print-area"></div>
 
 <!-- BOTTOM BAR -->
 <div class="bottom-bar">
@@ -712,7 +662,7 @@ function closeAC(){ document.getElementById('ac-list').classList.remove('show');
 // ══════════════════════════════════════════
 async function loadSantriFromSheets(){
   const statusEl = document.getElementById('sheets-status');
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=544298237`;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
   try{
     const res = await fetch(url);
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -791,7 +741,7 @@ function buildRaporHTML(data){
 
   // Build assessment tables
   let assessHTML = '';
-  secOrder.forEach((secId, idx)=>{
+  secOrder.forEach(secId=>{
     const sec = secMap[secId];
     let rows = '';
     sec.poin.forEach(p=>{
@@ -799,9 +749,8 @@ function buildRaporHTML(data){
         <tr class="pt-poin-hdr"><td class="pt-poin-no"></td><td><strong>${p.nama}</strong></td></tr>
         <tr><td class="pt-poin-no">${p.no}</td><td class="pt-narasi">${p.narasi||'&nbsp;'}</td></tr>`;
     });
-    const breakCls = idx > 0 ? ' pt-sec-break' : '';
     assessHTML += `
-      <table class="pt-tbl${breakCls}">
+      <table class="pt-tbl">
         <tr>
           <td class="pt-sec-no pt-sec-hdr" style="width:24px">${secId}</td>
           <td class="pt-sec-hdr">${sec.title}</td>
@@ -937,44 +886,31 @@ function onOverlayClick(e){
 // ══════════════════════════════════════════
 function downloadPDF(){
   const data = getForm();
-
-  // Hide all body children + reset scroll
   const allChildren = Array.from(document.body.children);
   allChildren.forEach(el => { el._origDisplay = el.style.display; el.style.display = 'none'; });
   document.body.style.overflow = 'visible';
-  window.scrollTo(0, 0);
-
-  // wrapper = 794px = full A4 width (210mm at 96dpi).
-  // padding 38px/57px ≈ 10mm top/bottom + 15mm left/right visual margins. margin:0 in html2pdf.
-  // overflow:hidden clips any child overflow to 794px — eliminates right-side clipping.
-  // box-sizing:border-box → content area = 794 - 2×57 = 680px.
   const wrapper = document.createElement('div');
   wrapper.className = 'pt';
-  wrapper.style.cssText = 'width:748px;padding:2px 0;overflow:hidden;box-sizing:border-box;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
+  wrapper.style.cssText = 'width:680px;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
   wrapper.innerHTML = buildRaporHTML(data);
-  wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse = 'collapse'; });
-  wrapper.querySelectorAll('.pt-tbl,.pt-sign-tbl').forEach(t => { t.style.tableLayout = 'fixed'; t.style.width = '100%'; });
+  wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse = 'collapse'; t.style.tableLayout = 'fixed'; t.style.width = '100%'; });
   wrapper.querySelectorAll('td,th').forEach(el => { el.style.border = '1px solid #000'; el.style.overflowWrap = 'break-word'; el.style.wordBreak = 'break-word'; });
   document.body.appendChild(wrapper);
-
   const nama = document.getElementById('f-nama').value || 'Santri';
   const sem  = data.semester.replace(/\s/g,'');
   const tahun= data.tahun;
-
   const restore = () => {
     if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
     allChildren.forEach(el => { el.style.display = el._origDisplay || ''; });
     document.body.style.overflow = '';
   };
-
   setTimeout(() => {
     html2pdf().set({
-      margin: [0.54, 6, 0.54, 6],
+      margin: [10,15,10,15],
       filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
       image: { type:'jpeg', quality:0.97 },
       html2canvas: { scale:2, useCORS:true, letterRendering:true, scrollX:0, scrollY:0 },
-      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
-      pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break' }
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
     }).from(wrapper).save()
       .then(restore)
       .catch(e => { restore(); alert('Gagal buat PDF: ' + e.message); });
@@ -1025,41 +961,72 @@ function loadContoh(){
   document.getElementById('f-catatan').value='Alhamdulillah Ananda Rara pada semester dua secara umum berkembang dengan sangat baik, yaitu pada aspek kepribadian islami, tsaqofah islam, materi Tarbiyah dan umum serta pengembangan kemampuan dasar. Harapan kami kedepannya Ananda lebih istiqomah lagi dalam memurojaah, seperti hafalan hadits, doa, Asmaul Husna, serta materi-materi lain yang sudah dipelajari supaya lebih lancar lagi. Selamat ya, Ananda Rara naik ke TK A. Allahumma barik anak shalihah.';
 
   const narasi = {
-    'Akhlak Kepada Guru':       {level:'BSB',evidence:'selalu memberi salam, bertutur sopan, merespons arahan tanpa diingatkan',narasi:'MasyaAllah Ananda Rara menunjukkan akhlak yang sangat baik kepada Musyrifah. Ananda selalu mengucapkan salam dengan tulus saat bertemu, bertutur kata sopan dan lembut, serta merespons setiap arahan Musyrifah dengan penuh hormat tanpa perlu diingatkan terlebih dahulu. Konsistensi ini menunjukkan karakter Qur\'ani yang tumbuh dengan baik dalam diri Ananda. Semoga Allah senantiasa menjaga akhlak mulia Ananda dan menjadikannya teladan yang baik bagi teman-temannya.'},
-    'Akhlak Kepada Teman':      {level:'BSB',evidence:'ramah, aktif membantu teman, mampu jadi penengah saat ada perselisihan',narasi:'MasyaAllah Ananda Rara menunjukkan akhlak yang sangat baik kepada teman-temannya. Ananda aktif membantu teman yang membutuhkan, selalu bersikap ramah dan hangat, serta mampu menjadi penengah yang bijak saat ada perbedaan kecil antar teman. Sikap sayang dan empati Ananda menjadi bukti nyata tumbuhnya karakter yang indah. Semoga Allah menjaga akhlak mulia Ananda dan menjadikannya sahabat yang selalu membawa kebaikan.'},
-    'Kemandirian':              {level:'BSB',evidence:'memakai sepatu sendiri, meletakkan tas di rak, makan dan membereskan peralatan sendiri',narasi:'MasyaAllah Ananda Rara menunjukkan kemandirian yang sangat baik dalam kegiatan sehari-hari. Ananda mampu memakai dan melepas sepatu sendiri, meletakkan tas di rak yang benar, makan dengan rapi, serta membereskan peralatan makan setelah selesai tanpa perlu diarahkan. Kemandiriannya merupakan bekal luar biasa yang mendukung tumbuh kembangnya. Semoga Allah menjaga karakter kuat ini dan menjadikannya bekal meraih cita-cita yang mulia.'},
-    'Kedisiplinan':             {level:'BCB',evidence:'tertib berseragam, rapi berbaris, mengikuti aturan kelas dengan baik',narasi:'Alhamdulillah Ananda Rara menunjukkan kedisiplinan yang baik dalam keseharian di sekolah. Ananda tertib dalam berseragam, mengikuti berbaris dengan baik, dan mematuhi aturan kelas. Kedisiplinan ini sudah menjadi kebiasaan yang baik dan perlu terus dijaga agar semakin konsisten tanpa perlu diingatkan. Semoga Allah memperkuat karakter disiplin Ananda dan menjadikannya pribadi yang amanah dalam setiap tanggung jawab.'},
-    'Karakter Kekhalifahan':    {level:'BSB',evidence:'berani memimpin berbaris, percaya diri tampil di depan, mengajak teman berbuat baik',narasi:'MasyaAllah Ananda Rara menunjukkan karakter kekhalifahan yang sangat baik. Ananda berani tampil memimpin berbaris di depan teman-teman, percaya diri maju ke depan kelas, dan aktif mengajak teman untuk berbuat baik. Jiwa kepemimpinan Ananda tumbuh dengan indah sesuai harapan. Semoga Allah menjadikan Ananda pemimpin yang amanah, adil, dan dicintai sebagaimana para nabi dan sahabat yang mulia.'},
-    'Sosial Emosional':         {level:'BSB',evidence:'mampu mengungkapkan emosi senang-sedih-antusias, bersosialisasi harmonis, empati tinggi',narasi:'MasyaAllah Ananda Rara menunjukkan kematangan sosial emosional yang sangat baik. Ananda mampu mengungkapkan emosi dengan tepat sesuai situasi seperti rasa senang, sedih, dan antusias, bersosialisasi dengan harmonis bersama teman, serta menunjukkan kepedulian dan empati yang tinggi. Kecerdasan emosional ini menjadi kekuatan yang berharga bagi Ananda. Semoga Allah menjaga kelembutan hati Ananda dan terus menumbuhkan kecerdasan emosionalnya.'},
-    "Tahfidz Qur'an":           {level:'BSB',evidence:'hafal Qs Al-Falaq sampai Al-Ikhlas sangat lancar, sedang proses Qs Al-Lahab',narasi:"MasyaAllah Ananda Rara menunjukkan kemampuan hafalan Al-Qur'an yang sangat baik. Hafalan surat mulai dari Qs. Al-Falaq hingga Qs. Al-Ikhlas sangat lancar dan kuat, dan Ananda sedang dalam proses menghafal Qs. Al-Lahab dengan semangat. Kecintaan Ananda terhadap Al-Qur'an sangat membanggakan dan menjadi bukti nyata kepeduliannya. Semoga Allah menjadikan Ananda ahlu Al-Qur'an yang mengamalkan dan menjaga kalam-Nya sepanjang hayat."},
-    "Tahsin Karimah & Al-Qur'an":{level:'BSB',evidence:'karimah Bab 1 halaman 4-16 sangat lancar, sedang proses halaman 17',narasi:"MasyaAllah Ananda Rara menunjukkan kemampuan membaca Al-Qur'an yang sangat baik. Ananda telah menyelesaikan karimah Bab 1 halaman 4-16 dengan sangat lancar dan sedang dalam proses membaca halaman 17 dengan penuh semangat. Kemajuan Ananda mencerminkan ketekunan dan kecintaan terhadap ilmu Al-Qur'an. Semoga Allah menjadikan bacaan Al-Qur'an Ananda semakin indah dan penuh keberkahan di setiap hurufnya."},
-    'Hadits':                   {level:'BCB',evidence:'hafal hadits tersenyum HR At-Tirmidzi dengan cukup lancar dan sedikit bimbingan',narasi:"Alhamdulillah Ananda Rara menunjukkan perkembangan yang baik dalam hafalan hadits. Ananda mampu menghafal hadits tentang senyum (HR. At-Tirmidzi) dengan cukup lancar dan sedikit bimbingan. Kemampuan ini menunjukkan usaha Ananda dalam mencintai sunnah Rasulullah ﷺ. Semoga Allah memperkuat hafalan Ananda dan menjadikan hadits-hadits Rasulullah ﷺ sebagai pedoman dalam kesehariannya."},
-    'Doa':                      {level:'BCB',evidence:'hafal doa belajar, ikrar syahadat, doa berbuka puasa, doa sebelum tidur',narasi:'Alhamdulillah Ananda Rara menunjukkan perkembangan yang baik dalam hafalan doa harian. Ananda mampu menghafal doa belajar, ikrar syahadat, doa berbuka puasa, dan doa sebelum tidur dengan cukup lancar. Kebiasaan berdoa ini menunjukkan tumbuhnya kesadaran spiritual yang baik dalam diri Ananda. Semoga Allah menjaga kebiasaan indah ini dan menjadikan doa sebagai kebutuhan yang tidak terpisahkan dari kehidupan Ananda.'},
-    'Asmaul Husna':             {level:'BSB',evidence:'hafal Ar-Rahman sampai As-Sami beserta gerakan dengan sangat lancar',narasi:"MasyaAllah Ananda Rara menunjukkan hafalan Asmaul Husna yang sangat baik. Ananda hafal dari Ar-Rahman hingga As-Sami beserta gerakannya dengan sangat lancar dan penuh semangat. Antusiasme Ananda saat kegiatan Asmaul Husna sangat terlihat dan menjadi inspirasi bagi teman-temannya. Semoga Allah menjaga hati Ananda agar senantiasa mengenal, mencintai, dan bertumbuh dalam keimanan kepada-Nya."},
-    'Dalil':                    {level:'BCB',evidence:'menghafal dalil materi fiqih, mampu mengikuti murojaah bersama dengan baik',narasi:'Alhamdulillah Ananda Rara menunjukkan perkembangan yang baik dalam menghafal dalil. Ananda mampu mengikuti murojaah dalil bersama-sama dengan cukup baik dan mulai mengaitkan dalil dengan materi yang dipelajari. Perkembangan ini menunjukkan semangat Ananda dalam mendalami landasan ilmu agama. Semoga Allah menjadikan ilmu dalil yang dipelajari Ananda penuh keberkahan dan bermanfaat dalam kehidupannya.'},
-    'Ibadah Sholat':            {level:'BSB',evidence:'praktek gerakan dan bacaan sholat sesuai materi, tertib mengikuti sholat berjamaah',narasi:"MasyaAllah Ananda Rara menunjukkan perkembangan yang sangat baik dalam ibadah sholat. Ananda mampu mempraktikkan gerakan dan bacaan sholat dengan baik sesuai materi yang dipelajari, dan mengikuti sholat berjamaah dengan tertib dan penuh kesungguhan. Konsistensi Ananda dalam beribadah sangat membanggakan. Semoga Allah menjaga semangat ibadah Ananda dan menjadikannya hamba yang mencintai sholat sebagaimana cinta Rasulullah ﷺ."},
-    'Bahasa Arab Dan Inggris':  {level:'BCB',evidence:'mengenal kosakata Bahasa Arab sesuai tema, mampu menjawab pertanyaan sederhana',narasi:'Alhamdulillah Ananda Rara menunjukkan perkembangan yang baik dalam pembelajaran Bahasa Arab dan Inggris. Ananda mengenali kosakata yang dipelajari sesuai tema, mampu menjawab pertanyaan sederhana, dan menunjukkan antusiasme yang baik saat kegiatan berlangsung. Perkembangan ini menjadi pondasi yang baik untuk terus berkembang. Semoga Allah menumbuhkan semangat belajar bahasa Ananda agar semakin fasih dan bermanfaat.'},
-    "Tadabbur Al-Qur'an":       {level:'BSB',evidence:'menyebutkan hikmah dari materi, aktif berdiskusi, menghubungkan dengan kehidupan sehari-hari',narasi:"MasyaAllah Ananda Rara menunjukkan pemahaman yang sangat baik dalam kegiatan tadabbur Al-Qur'an. Ananda mampu menyebutkan hikmah dari materi yang dipelajari, aktif berdiskusi dengan teman dan Musyrifah, serta mampu menghubungkan makna Al-Qur'an dengan pengalaman sehari-hari. Kemampuan berpikir reflektif Ananda sungguh membanggakan. Semoga Allah menjadikan Ananda pribadi yang bijak dan senantiasa dekat dengan petunjuk Al-Qur'an."},
-    "Terjemah Al-Qur'an":       {level:'BCB',evidence:'mengingat arti ayat target, menjawab pertanyaan makna dengan cukup baik',narasi:"Alhamdulillah Ananda Rara menunjukkan perkembangan yang baik dalam memahami terjemah Al-Qur'an. Ananda mampu mengingat arti ayat yang menjadi target pembelajaran dan menjawab pertanyaan tentang makna dengan cukup baik. Kemampuan ini menunjukkan tumbuhnya kedekatan Ananda dengan makna firman Allah. Semoga Allah menjadikan Al-Qur'an sebagai petunjuk yang senantiasa dekat dengan hati Ananda sepanjang hidupnya."},
-    'Tauhid : Mengenal Allah':  {level:'BSB',evidence:'mengaitkan ciptaan Allah dengan rasa syukur, aktif berdiskusi tentang kebesaran Allah',narasi:'MasyaAllah Ananda Rara menunjukkan pemahaman yang sangat baik tentang mengenal Allah. Ananda aktif mengaitkan berbagai keindahan ciptaan Allah dengan rasa syukur, dan antusias berdiskusi tentang kebesaran Allah dalam berbagai kesempatan. Rasa kagum dan cinta Ananda kepada Allah sangat terlihat dan membanggakan. Semoga Allah menjaga hati Ananda agar senantiasa mengenal, mencintai, dan bergantung hanya kepada-Nya.'},
-    'Tauhid : Rukun Islam':     {level:'BCB',evidence:'menyebutkan lima Rukun Islam, memahami makna syahadat dan kewajiban sholat',narasi:'Alhamdulillah Ananda Rara menunjukkan pemahaman yang baik tentang Rukun Islam. Ananda mampu menyebutkan lima Rukun Islam, memahami makna syahadat, dan mengetahui kewajiban sholat dengan cukup baik. Pemahaman ini menjadi pondasi iman yang penting untuk terus diperkuat. Semoga Allah menjaga fitrah keimanan Ananda dan menumbuhkannya menjadi pribadi yang bertauhid kuat.'},
-    'Materi Fiqih':             {level:'BSB',evidence:'hafal nama dan waktu sholat wajib, praktek tata cara wudhu, mengenal ibadah haji',narasi:"MasyaAllah Ananda Rara menunjukkan pemahaman yang sangat baik dalam materi fiqih. Ananda hafal nama-nama dan waktu sholat wajib, mampu mempraktikkan tata cara wudhu dengan urutan yang benar, dan memahami pengenalan ibadah haji dengan baik. Kemampuan Ananda mempraktikkan materi secara mandiri sangat membanggakan. Semoga Allah menjadikan ilmu fiqih yang dipelajari sebagai amal yang bermanfaat sepanjang hayat."},
-    'Adab dan Akhlaq':          {level:'BSB',evidence:'mempelajari dan mempraktikkan adab puasa dan adab tidur secara konsisten',narasi:"MasyaAllah Ananda Rara menunjukkan penerapan adab dan akhlaq yang sangat baik dalam keseharian. Ananda sudah mempelajari dan mempraktikkan adab-adab seperti adab puasa dan adab tidur dengan baik dan konsisten. Kemampuan Ananda menerapkan adab dalam kehidupan nyata adalah bukti nyata tumbuhnya akhlak Qur'ani. Semoga Allah menjaga dan memperkuat akhlak mulia Ananda sehingga menjadi kebiasaan yang langgeng."},
-    'Materi Tema':              {level:'BSB',evidence:'mengenal bagian tumbuhan, binatang ternak, kendaraan darat, mampu menjawab setiap pertanyaan',narasi:'MasyaAllah Ananda Rara menunjukkan pemahaman yang sangat baik terhadap materi tema. Ananda mampu mengenal dan menyebutkan bagian-bagian tumbuhan, ragam binatang ternak beserta manfaatnya, serta macam-macam kendaraan darat dengan lancar. Setiap pertanyaan Musyrifah dijawab dengan tepat dan antusias, mencerminkan rasa ingin tahu yang tinggi. Semoga Allah menjaga semangat belajar Ananda dan menjadikannya pribadi yang berilmu serta bermanfaat.'},
-    'Kisah Nabi dan Para Sahabat':{level:'BSB',evidence:"memahami kisah Nabi Ibrahim 'alaihissalam, menyebutkan hikmah utama, menghubungkan dengan kehidupan",narasi:"MasyaAllah Ananda Rara menunjukkan pemahaman yang sangat baik terhadap kisah para nabi. Ananda mampu memahami kisah Nabi Ibrahim 'alaihissalam dengan baik, menyebutkan hikmah utama dari kisah tersebut, dan menghubungkan pelajaran dengan kehidupan sehari-hari. Ketertarikan Ananda terhadap kisah para nabi sangat tinggi. Semoga Allah menumbuhkan semangat untuk meneladani akhlak mulia para nabi dalam kesehariannya."},
-    'Kisah Ilmuwan Muslim dan Sifat Rasulullah ﷺ':{level:'BCB',evidence:'mengenal kisah tokoh ilmuwan Muslim, menceritakan kembali dengan cukup baik',narasi:"Alhamdulillah Ananda Rara menunjukkan pemahaman yang baik terhadap kisah ilmuwan Muslim dan sifat Rasulullah ﷺ. Ananda mampu mengenal dan menceritakan kembali kisah tokoh yang dipelajari, serta memahami pesan moral yang terkandung di dalamnya dengan cukup baik. Ketertarikan Ananda terhadap kisah teladan ini menjadi modal yang baik. Semoga Allah menjadikan kisah-kisah teladan sebagai inspirasi dalam bertumbuh menjadi pribadi yang mulia."},
-    'Syair Islami':        {level:'BSB',evidence:'hafal syair Islami semester ini dengan lancar dan ekspresif, penuh semangat saat tampil',narasi:"MasyaAllah Ananda Rara menunjukkan kemampuan syair Islami yang sangat baik dan membanggakan. Ananda hafal dan mampu membawakan syair Islami semester ini dengan lancar dan ekspresif, terlihat penuh semangat saat tampil di depan Musyrifah dan teman-temannya. Kemampuan ini mencerminkan tumbuhnya kecintaan Ananda terhadap keindahan sastra Islami. Semoga Allah menjaga semangat Ananda dan menjadikan syair-syair indah ini sebagai bekal mendekatkan diri kepada-Nya."},
-    'Kemampuan Bahasa':    {level:'BSB',evidence:'mampu bercerita dengan kalimat lengkap dan runtut, kosakata kaya, aktif bertanya dan menjawab',narasi:'MasyaAllah Ananda Rara menunjukkan kemampuan bahasa yang sangat baik dan menggembirakan. Ananda mampu bercerita menggunakan kalimat yang lengkap dan runtut, memiliki kosakata yang kaya, serta aktif bertanya dan menjawab dalam berbagai kegiatan pembelajaran. Perkembangan bahasa yang pesat ini menjadi pondasi komunikasi yang kuat untuk Ananda ke depannya. Semoga Allah menambah kecerdasan Ananda dan menjadikan lisannya sebagai lisan yang selalu berkata baik dan bermanfaat.'},
-    'Kognitif':            {level:'BSB',evidence:'mampu menyelesaikan puzzle, mengenal konsep bilangan, mampu memecahkan tantangan sederhana secara mandiri',narasi:'MasyaAllah Ananda Rara menunjukkan kemampuan kognitif yang sangat baik dan membanggakan. Ananda mampu menyelesaikan puzzle dengan tepat, mengenal konsep bilangan, serta memecahkan berbagai tantangan sederhana secara mandiri dan penuh semangat. Kecerdasan berpikir Ananda terus berkembang dengan luar biasa dan menjadi modal berharga bagi proses belajarnya. Semoga Allah memberkahi akal dan pikiran Ananda, menjadikannya anak yang cerdas dan bijak dalam menggunakan ilmunya untuk kebaikan.'},
-    'Motorik':             {level:'BSB',evidence:'koordinasi motorik kasar baik saat senam dan berlari, motorik halus baik dalam mewarnai dan menggunting',narasi:'MasyaAllah Ananda Rara menunjukkan perkembangan motorik yang sangat baik dan mengesankan. Koordinasi motorik kasar Ananda tampak baik saat kegiatan senam dan bermain aktif, sementara motorik halusnya pun berkembang pesat terlihat dari kemampuan mewarnai dan menggunting yang rapi. Perkembangan fisik yang seimbang ini sangat mendukung kesiapan Ananda untuk berbagai aktivitas. Semoga Allah menjaga kesehatan dan kekuatan fisik Ananda agar tumbuh menjadi anak yang sehat, kuat, dan aktif.'},
-    'Kreatifitas':         {level:'BSB',evidence:'aktif dalam kegiatan seni, hasil karya orisinal dan penuh warna, berani berekspresi dengan percaya diri',narasi:'MasyaAllah Ananda Rara menunjukkan kreatifitas yang sangat baik dan menakjubkan. Ananda selalu antusias dalam kegiatan seni dan kreasi, menghasilkan karya yang orisinal dan penuh warna dengan ekspresi yang bebas dan penuh percaya diri. Daya imajinasi dan kreativitas Ananda menjadi kekuatan tersendiri yang sangat berharga. Semoga Allah menumbuhkan potensi kreatif Ananda dan menjadikannya sarana mengungkapkan keindahan dalam bingkai Islam.'},
+    'Akhlak Kepada Guru':       {level:'BSB',evidence:'memberi salam, bertutur sopan, merespons arahan',narasi:'Alhamdulillah Ananda Rara menunjukkan sikap yang baik terhadap Musyrifah. Ananda selalu memberi salam saat bertemu Musyrifah, bertutur kata yang baik seperti "tolong", "terima kasih", dan "maaf", serta dapat merespon dengan baik arahan dari Musyrifah. Semoga Ananda Rara senantiasa berakhlak baik dengan Musyrifah ataupun guru lainnya.'},
+    'Akhlak Kepada Teman':      {level:'BSB',evidence:'ramah, berbagi mainan, mengajak bermain bersama',narasi:'Alhamdulillah Ananda Rara anak baik, mampu bersikap baik terhadap teman, peduli dan mau berbagi dengan teman, bersikap ramah serta bertutur kata baik, senang mengajak bermain bersama, dan sayang terhadap teman-temannya. Semoga Ananda Rara senantiasa berakhlak baik dengan temannya baik di lingkungan sekolah maupun di luar sekolah.'},
+    'Kemandirian':              {level:'BSB',evidence:'memakai sepatu sendiri, meletakkan tas di rak, makan mandiri',narasi:'Alhamdulillah Ananda Rara mampu melakukan aktivitas sehari-hari secara mandiri seperti, memakai sepatu dan meletakkannya di rak sepatu, meletakkan tas di rak, mencuci tangan, makan dan merapihkan peralatan makan-minum sendiri. Semoga Ananda Rara kedepannya semakin mandiri dalam menyelesaikan tugas-tugas hingga selesai.'},
+    'Kedisiplinan':             {level:'BCB',evidence:'tertib berseragam, rapi berbaris, buang sampah pada tempatnya',narasi:'Alhamdulillah Ananda Rara anak yang tertib, seperti tertib dalam mengenakan seragam sekolah, berbaris, ketika mengikuti kegiatan belajar baik di dalam maupun di luar kelas, membuang sampah pada tempatnya. Harapan kami kedepannya Ananda dapat lebih tertib dan istiqomah seperti membereskan perlengkapan sekolah selesai melakukannya tanpa diberitahu dari Musyrifah.'},
+    'Karakter Kekhalifahan':    {level:'BSB',evidence:'berani maju ke depan kelas, memimpin berbaris',narasi:"Alhamdulillah pada semester ini Ananda Rara sudah mampu menunjukkan sikap kekhalifahan seperti, berani memberi nasihat dan mengajak temannya untuk berbuat baik. Ananda juga berani maju ke depan kelas pada berbaris maupun tampil pada saat acara. Semoga Ananda Rara dapat meningkatkan lagi karakter kekhalifahannya seperti yang dicontohkan oleh Rasulullah Shalallahu'alaihi Wa Sallam dan para sahabatnya."},
+    'Sosial Emosional':         {level:'BSB',evidence:'mampu mengungkapkan emosi dengan baik (senang, sedih, antusias)',narasi:'Alhamdulillah Ananda Rara menunjukkan perkembangan sosial-emosional yang baik. Ananda mampu bersosialisasi dengan baik terhadap teman-teman dan Musyrifah. Ananda juga mampu mengungkapkan emosinya dengan baik sesuai dengan kondisi yang ada seperti "senang-sedih-antusias". Semoga Ananda Rara bisa menjaga kestabilan sosial emosionalnya baik di lingkungan sekolah maupun di luar lingkungan sekolah.'},
+    "Tahfidz Qur'an":           {level:'BSB',evidence:'lancar menghafal Qs Al Falaq sampai Qs Al Ikhlas',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal Qs Al Falaq sampai dengan Qs. Al Ikhlas dengan lancar dan sedang proses menghafal Qs. Al Lahab ayat 1-3. Supaya hafalannya tetap terjaga dan lebih mutqin lagi, alangkah baiknya jika Ananda senantiasa istiqomah dalam memurojaah. Semoga Ananda Rara selalu istiqomah dalam murajaah dan lebih semangat lagi dalam menambah hafalannya."},
+    "Tahsin Karimah & Al-Qur'an":{level:'BSB',evidence:'karimah Bab 1 halaman 4-16 lancar, sedang proses halaman 17',narasi:"Alhamdulillah untuk tahsin karimah pada semester ini, Ananda Rara telah sampai pada karimah Bab. 1 halaman 4-16 dengan lancar dan sedang proses membaca halaman 17 baris 1-2 dengan cukup lancar. Semoga kedepannya Ananda selalu semangat dalam belajar karimah dan Allah berikan kemudahan kepada Ananda dalam mempelajari Al-Quran."},
+    'Hadits':                   {level:'BCB',evidence:'hafal hadits tersenyum HR At Tirmidzi',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal hadits tersenyum (HR. At Tirmidzi) dengan cukup lancar dan sedikit bimbingan. Semoga Ananda Rara senantiasa istiqomah dalam muraja'ah hadits-hadits yang sudah dipelajari dan mampu mengamalkannya."},
+    'Doa':                      {level:'BCB',evidence:'lancar menghafal doa harian seperti ikrar syahadat, doa belajar',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal dengan lancar doa-doa harian seperti, ikrar syahadat, doa belajar, doa berbuka puasa, dan doa sebelum tidur dengan cukup lancar dan sedikit bimbingan. Semoga Ananda Rara dapat selalu mengamalkan doa-doa yang sudah dipelajari dalam keseharian."},
+    'Asmaul Husna':             {level:'BSB',evidence:'hafal Ar-Rahman sampai As Sami dengan lancar',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal Asmaul Husna dari (Ar-Rahman - As Sami) dengan lancar. Semoga Ananda Rara selalu istiqomah dalam menghafal, memurajaah Asmaul Husna yang sudah dihafalnya dan semangat untuk menambah hafalan Asmaul Husna yang lain beserta gerakannya."},
+    'Syair Islami':             {level:'BSB',evidence:'hafal syair bagian tumbuhan, adab berbicara, tepuk wudhu',narasi:"Alhamdulillah Ananda Rara sudah mampu menghafal syair-syair islami seperti syair bagian-bagian tumbuhan, adab berbicara, syair tegakkan sholat, syair nama-nama bulan Hijriyah, tepuk wudhu, dan tepuk puasa dengan lancar. Semoga Ananda Rara selalu istiqomah dalam menghafal dan memurajaah syair-syair islami yang sudah dihafalkan."},
+    'Tauhid : Mengenal Allah':  {level:'BSB',evidence:'mempelajari ragam tumbuhan ciptaan Allah, nama bulan Hijriyah',narasi:"Alhamdulillah Ananda Rara telah mempelajari dan mengenal materi mengenai ragam tumbuhan ciptaan Allah dengan baik. Ananda juga sudah mempelajari dan mampu menghafal nama-nama bulan Hijriyah melalui syair islami dengan lancar. Semoga Ananda selalu semangat dalam memurojaah materi yang sudah dipelajari."},
+    'Materi Fiqih':             {level:'BSB',evidence:'nama sholat wajib, tata cara wudhu, tata cara ibadah haji',narasi:"Alhamdulillah Ananda Rara telah mempelajari materi-materi fiqih dengan baik, diantaranya nama-nama sholat wajib, waktu sholat, rekaat sholat, tata cara sholat dari wudhu, dzikir, berdoa, tentang apa itu puasa, apa itu wudhu dan caranya, dan tata cara ibadah haji. Semoga materi yang sudah dipelajari dapat memberikan pengetahuan dan bermanfaat dalam kehidupan sehari-hari."},
+    'Adab dan Akhlaq':          {level:'BSB',evidence:'mempelajari adab puasa dan adab tidur',narasi:"Alhamdulillah Ananda Rara sudah mempelajari adab-adab dan mempraktekkannya dengan baik, seperti adab puasa dan adab tidur. Semoga kedepannya Ananda Rara dapat menerapkan adab-adab yang sudah dipelajari dalam kehidupan sehari-hari."},
+    'Materi Tema':              {level:'BSB',evidence:'bagian tumbuhan, binatang ternak, kendaraan darat',narasi:"Alhamdulillah Ananda Rara telah mempelajari dan mengenal dengan baik tentang bagian-bagian tumbuhan, mengenal ragam binatang ternak, manfaat binatang ternak, macam-macam kendaraan darat, dan fungsi kendaraan darat. Ananda mampu menjawab dengan benar setiap pertanyaan dari Musyrifah. Semoga materi yang sudah dipelajari dapat memberikan pengetahuan dan bermanfaat dalam kehidupan sehari-hari."},
+    'Kemampuan Bahasa':         {level:'BSB',evidence:'mengungkapkan keinginan, berkomunikasi baik, menceritakan kembali',narasi:"Alhamdulillah kemampuan berbahasa Ananda Rara berkembang dengan sangat baik. Ananda mampu mengungkapkan keinginannya, meminta tolong, berkomunikasi dengan bahasa yang baik, berbagi cerita tentang kegiatan sehari-hari, menyimak tayangan beredukasi dan mampu menceritakan kembali. Semoga kedepannya Ananda Rara bisa terus meningkatkan keterampilannya dalam berbahasa."},
+    'Kognitif':                 {level:'BSB',evidence:'mengenal angka 1-15, huruf konsonan B-G, huruf vokal',narasi:"Alhamdulillah, kemampuan kognitif Ananda Rara berkembang dengan baik. Ananda Rara sudah mampu mengenal dan mempelajari angka 1-15. Ananda sudah mampu berhitung dan menyebutkan simbol angka 1-15 dengan sangat baik. Ananda juga sudah mengenal dan mempelajari huruf konsonan B-G dan huruf vokal (a, i, u, e, o). Semoga Ananda Rara terus semangat dan diberi kemudahan dalam mengasah kemampuan kognitifnya."},
+    'Motorik':                  {level:'BSB',evidence:'mewarnai, meronce, kolase, gerakan asmaul husna, panahan',narasi:"Alhamdulillah perkembangan motorik kasar dan motorik halus Ananda Rara berkembang dengan baik. Dalam aspek motorik kasar, Ananda terampil dalam menggerakkan tangan kanan dan tangan kiri melalui ice breaking, gerakan Asmaul Husna, serta saat fun game seperti panahan. Dalam aspek motorik halus, Ananda Rara mampu mewarnai dan melukis menggunakan krayon serta kuas, meronce, membuat kolase dengan baik. Semoga Ananda Rara tetap semangat dan diberi kemudahan dalam melatih keterampilan gerak tubuhnya."},
+    'Kreatifitas':              {level:'BSB',evidence:'membuat vegetable garden, domba, hiasan nama bulan Hijriyah',narasi:"Alhamdulillah Ananda Rara sangat antusias dalam kegiatan berkreasi seperti, membuat vegetable garden, membuat domba, membuat hiasan nama-nama bulan Hijriyah, membuat jadwal waktu sholat, membuat kartu ucapan menyambut Ramadhan. Semoga Ananda Rara tetap semangat meningkatkan keterampilan kreativitasnya."},
   };
-  state.assessment.forEach(p => {
-    if (narasi[p.nama]) {
-      p.level    = narasi[p.nama].level;
-      p.evidence = narasi[p.nama].evidence;
-      p.narasi   = narasi[p.nama].narasi;
-    }
-  });
-  render();
+
+  state.assessment.forEach(p=>{ const n=narasi[p.nama]; if(n){ p.level=n.level; p.evidence=n.evidence; p.narasi=n.narasi; } });
+  renderAssessment();
 }
+
+// ══════════════════════════════════════════
+// AI NARASI GENERATION
+// ══════════════════════════════════════════
+async function generateNarasi(idx) {
+  const p = state.assessment[idx];
+  if (!p.level) {
+    alert('Pilih dulu level perkembangan (MB / BCB / BSB) sebelum generate AI.');
+    return;
+  }
+
+  const btn = document.getElementById(`ai-btn-${idx}`);
+  const ta  = document.getElementById(`narasi-ta-${idx}`);
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating…';
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        poin:       p.nama,
+        level:      p.level,
+        evidence:   p.evidence,
+        namaSantri: document.getElementById('f-nama').value || 'Santri',
+        kelas:      document.getElementById('f-kelas').value,
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Terjadi kesalahan');
+
+    p.narasi  = data.narasi;
+    ta.value  = data.narasi;
+  } catch(e) {
+    alert('Gagal generate narasi: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ Generate AI';
+  }
+}
+</script>
+</body>
+</html>
