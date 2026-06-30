@@ -184,8 +184,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'poin dan level wajib diisi' });
   }
 
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) {
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_API_KEY) {
     return res.status(500).json({ error: 'API key belum dikonfigurasi di server' });
   }
 
@@ -235,28 +235,29 @@ Tulis HANYA narasi rapor (tanpa judul, tanpa penjelasan tambahan):`;
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      'https://api.groq.com/openai/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.75,
-            maxOutputTokens: 350,
-            topP: 0.9,
-          },
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.75,
+          max_tokens: 350,
         }),
       }
     );
 
     if (!response.ok) {
       const errText = await response.text();
-      return res.status(response.status).json({ error: 'Gemini API error: ' + errText });
+      return res.status(response.status).json({ error: 'Groq API error: ' + errText });
     }
 
     const data = await response.json();
-    const narasi = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    const narasi = data.choices?.[0]?.message?.content?.trim();
 
     if (!narasi) {
       return res.status(500).json({ error: 'Tidak ada respons dari AI, coba lagi.' });
