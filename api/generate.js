@@ -109,7 +109,32 @@ const NARRATIVE_CONTEXT = {
   "MATERI TEMA": {
     MB: { a:"Alhamdulillah Ananda mulai mengenal tema pembelajaran yang dipelajari selama semester ini. memorization_or_mastery: memahami konsep-konsep dasar sesuai tema.", e:"mengikuti kegiatan eksplorasi mengenali objek yang dipelajari menunjukkan rasa ingin tahu", h:"Semoga Allah menjaga semangat belajar dan rasa ingin tahu Ananda terhadap berbagai hal yang bermanfaat." },
     BCB: { a:"Alhamdulillah Ananda menunjukkan pemahaman yang baik terhadap tema pembelajaran. memorization_or_mastery: mampu menghubungkan berbagai konsep yang dipelajari.", e:"aktif dalam kegiatan tema mampu menjawab pertanyaan sederhana menunjukkan antusiasme belajar", h:"Semoga Allah menjadikan setiap ilmu yang dipelajari sebagai jalan menuju kebaikan." },
-    BSB: { a:"MasyaAllah Ananda menunjukkan pemahaman yang sangat baik terhadap tema pembelajaran. memorization_or_mastery: mampu memahami dan menjelaskan kembali konsep-konsep yang dipelajari.", e:"aktif mengeksplorasi materi menunjukkan rasa ingin tahu yang tinggi mampu mengaitkan pembelajaran dengan pengalaman sehari-hari", h:"Semoga Allah menjaga semangat belajar Ananda dan menjadikannya pribadi yang berilmu serta bermanfaat. TAQI_NARRATIVE_BLOCKS_V3" },
+    BSB: { a:"MasyaAllah Ananda menunjukkan pemahaman yang sangat baik terhadap tema pembelajaran. memorization_or_mastery: mampu memahami dan menjelaskan kembali konsep-konsep yang dipelajari.", e:"aktif mengeksplorasi materi menunjukkan rasa ingin tahu yang tinggi mampu mengaitkan pembelajaran dengan pengalaman sehari-hari", h:"Semoga Allah menjaga semangat belajar Ananda dan menjadikannya pribadi yang berilmu serta bermanfaat." },
+  },
+  "SYAIR ISLAMI": {
+    MB: { a:"Alhamdulillah Ananda mulai mengenal syair Islami yang dipelajari semester ini.", e:"mengikuti pembacaan syair bersama mulai mengingat bait-bait syair sesekali tampil dengan semangat meskipun masih memerlukan bimbingan", h:"Semoga Allah menumbuhkan kecintaan Ananda terhadap keindahan syair dan seni Islami sebagai cara mendekatkan diri kepada-Nya." },
+    BCB: { a:"Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam syair Islami.", e:"mampu menghafal dan mengikuti sebagian bait syair tampil dengan cukup percaya diri mengikuti irama dengan baik", h:"Semoga Allah menjaga semangat Ananda dalam mengekspresikan keindahan Islam melalui syair yang indah dan penuh makna." },
+    BSB: { a:"MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam syair Islami.", e:"hafal syair dengan sangat lancar tampil ekspresif dan percaya diri di depan teman menjadi inspirasi bagi kelas", h:"Semoga Allah menjadikan kemampuan Ananda sebagai sarana mengungkapkan keindahan Islam dan mendekatkan diri kepada-Nya." },
+  },
+  "KEMAMPUAN BAHASA": {
+    MB: { a:"Alhamdulillah Ananda mulai menunjukkan perkembangan dalam kemampuan berbahasa.", e:"mampu mengungkapkan kebutuhan sederhana mulai bercerita dengan kalimat pendek aktif mengikuti kegiatan berbahasa bersama teman", h:"Semoga Allah menumbuhkan kemampuan berkomunikasi Ananda agar semakin lancar dan menjadikan lisannya selalu berkata baik." },
+    BCB: { a:"Alhamdulillah Ananda menunjukkan perkembangan kemampuan bahasa yang baik.", e:"mampu bercerita dengan kalimat yang cukup runtut memahami pertanyaan dan menjawab dengan tepat menunjukkan keberanian berkomunikasi", h:"Semoga Allah menambah kecerdasan berbahasa Ananda dan menjadikannya lisan yang selalu berkata baik dan bermanfaat." },
+    BSB: { a:"MasyaAllah Ananda menunjukkan kemampuan bahasa yang sangat baik dan menggembirakan.", e:"mampu bercerita dengan kalimat lengkap dan runtut kosakata kaya aktif bertanya dan menjawab dalam berbagai kegiatan pembelajaran", h:"Semoga Allah menambah kecerdasan Ananda dan menjadikan lisannya sebagai lisan yang selalu berkata baik dan bermanfaat bagi banyak orang." },
+  },
+  "KOGNITIF": {
+    MB: { a:"Alhamdulillah Ananda mulai menunjukkan rasa ingin tahu dan kemampuan berpikir yang berkembang.", e:"mengikuti kegiatan berpikir sederhana mulai memahami konsep dasar menunjukkan rasa ingin tahu yang tumbuh", h:"Semoga Allah memberkahi akal dan pikiran Ananda agar terus berkembang menjadi anak yang cerdas dan bermanfaat." },
+    BCB: { a:"Alhamdulillah Ananda menunjukkan perkembangan kognitif yang baik dalam berbagai kegiatan.", e:"mampu memahami konsep dasar menyelesaikan tugas dengan cukup mandiri menunjukkan kemampuan berpikir yang terus berkembang", h:"Semoga Allah memberkahi kecerdasan Ananda dan menjadikannya anak yang bijak menggunakan akalnya untuk kebaikan." },
+    BSB: { a:"MasyaAllah Ananda menunjukkan kemampuan kognitif yang sangat baik dan membanggakan.", e:"mampu menyelesaikan tantangan secara mandiri mengenal konsep dengan baik menunjukkan kemampuan berpikir yang logis dan kreatif", h:"Semoga Allah memberkahi akal dan pikiran Ananda menjadikannya anak yang cerdas dan bijak menggunakan ilmunya untuk kebaikan." },
+  },
+  "MOTORIK": {
+    MB: { a:"Alhamdulillah Ananda mulai menunjukkan perkembangan motorik dalam kegiatan sehari-hari.", e:"mengikuti kegiatan fisik dengan antusias mulai menunjukkan koordinasi yang berkembang aktif dalam kegiatan gerak dan bermain", h:"Semoga Allah menjaga kesehatan Ananda dan menumbuhkan fisik yang kuat serta aktif dalam kebaikan." },
+    BCB: { a:"Alhamdulillah Ananda menunjukkan perkembangan motorik yang baik dalam berbagai aktivitas.", e:"koordinasi gerak cukup baik mampu mengikuti aktivitas fisik dengan baik perkembangan motorik halus menunjukkan kemajuan yang menggembirakan", h:"Semoga Allah menjaga kesehatan dan kekuatan fisik Ananda untuk mendukung setiap aktivitas belajar dan bermainnya." },
+    BSB: { a:"MasyaAllah Ananda menunjukkan perkembangan motorik yang sangat baik dan mengesankan.", e:"koordinasi motorik kasar dan halus berkembang dengan baik aktif dan lincah dalam kegiatan fisik mampu menyelesaikan tugas motorik halus dengan rapi", h:"Semoga Allah menjaga kesehatan Ananda agar tumbuh menjadi anak yang sehat kuat dan aktif dalam kebaikan." },
+  },
+  "KREATIFITAS": {
+    MB: { a:"Alhamdulillah Ananda mulai menunjukkan ekspresi kreatif dalam kegiatan seni dan eksplorasi.", e:"mulai berani berekspresi dalam kegiatan seni mengikuti kegiatan kreasi dengan antusias menunjukkan minat terhadap berbagai media kreasi", h:"Semoga Allah menumbuhkan potensi kreatif Ananda dan menjadikannya sarana mengungkapkan keindahan dalam bingkai Islam." },
+    BCB: { a:"Alhamdulillah Ananda menunjukkan kreatifitas yang baik dalam berbagai kegiatan seni.", e:"aktif mengikuti kegiatan kreasi berani mengekspresikan ide dengan percaya diri menghasilkan karya yang cukup orisinal dan beragam", h:"Semoga Allah mengembangkan potensi kreatif Ananda dan menjadikannya sarana berbuat kebaikan yang indah." },
+    BSB: { a:"MasyaAllah Ananda menunjukkan kreatifitas yang sangat baik dan menakjubkan.", e:"aktif dalam kegiatan seni menghasilkan karya yang orisinal dan penuh warna berani berekspresi dengan percaya diri menjadi inspirasi teman-temannya", h:"Semoga Allah menumbuhkan potensi kreatif Ananda dan menjadikannya sarana mengungkapkan keindahan dalam bingkai Islam." },
   },
 };
 
@@ -120,16 +145,16 @@ const POIN_DOMAIN_MAP = {
   'Kedisiplinan': 'KEDISIPLINAN',
   'Karakter Kekhalifahan': 'KARAKTER KEKHALIFAHAN',
   'Sosial Emosional': 'SOSIAL EMOSIONAL',
-  'Tahfidz Qur\'an': 'TAHFIDZ',
-  'Tahsin Karimah & Al-Qur\'an': 'TAHSIN',
+  "Tahfidz Qur'an": 'TAHFIDZ',
+  "Tahsin Karimah & Al-Qur'an": 'TAHSIN',
   'Hadits': 'HADITS',
   'Doa': 'DOA',
   'Asmaul Husna': 'ASMAUL HUSNA',
   'Dalil': 'DALIL',
   'Ibadah Sholat': 'IBADAH SHOLAT',
   'Bahasa Arab Dan Inggris': 'BAHASA ARAB',
-  'Tadabbur Al-Qur\'an': 'TADABBUR',
-  'Terjemah Al-Qur\'an': "TERJEMAH QUR'AN",
+  "Tadabbur Al-Qur'an": 'TADABBUR',
+  "Terjemah Al-Qur'an": "TERJEMAH QUR'AN",
   'Tauhid : Mengenal Allah': 'TAUHID',
   'Tauhid : Rukun Islam': 'TAUHID',
   'Materi Fiqih': 'MATERI FIKIH',
@@ -137,7 +162,12 @@ const POIN_DOMAIN_MAP = {
   'Adab dan Akhlaq': 'AKHLAK GURU',
   'Materi Tema': 'MATERI TEMA',
   'Kisah Nabi dan Para Sahabat': 'KISAH NABI',
-  'Kisah Ilmuwan Muslim dan Sifat Rasulullah ÷': 'KISAH TELADAN',
+  'Kisah Ilmuwan Muslim dan Sifat Rasulullah ﷺ': 'KISAH TELADAN',
+  'Syair Islami': 'SYAIR ISLAMI',
+  'Kemampuan Bahasa': 'KEMAMPUAN BAHASA',
+  'Kognitif': 'KOGNITIF',
+  'Motorik': 'MOTORIK',
+  'Kreatifitas': 'KREATIFITAS',
 };
 
 export default async function handler(req, res) {
@@ -181,18 +211,18 @@ Gunakan pola di atas sebagai INSPIRASI gaya dan tone, namun WAJIB sesuaikan deng
   const prompt = `Kamu adalah Musyrifah senior di KB-TK Tarbiyah Qur'aniyah (TaQi), sekolah Islam berbasis karakter Qur'ani. Tugasmu menulis narasi rapor perkembangan santri yang hangat, personal, dan Islami.
 
 TAQI NARRATIVE DNA — pola wajib:
-PENCAPAIAN → BUKTI NYATA → INSIGHT PERKEMBANGAN → HARAPAN & DOA
+PENCAPAIAN \u2192 BUKTI NYATA \u2192 INSIGHT PERKEMBANGAN \u2192 HARAPAN & DOA
 
 ATURAN PENULISAN:
 1. Mulai dengan "Alhamdulillah" (MB/BCB) atau "MasyaAllah" (BSB)
-2. Panjang: 60–120 kata — tidak lebih, tidak kurang
+2. Panjang: 60\u2013120 kata \u2014 tidak lebih, tidak kurang
 3. DILARANG kata: kurang, lemah, gagal, buruk, tidak bisa, belum mampu, masih kesulitan
 4. Hal yang perlu ditingkatkan: ungkapkan HANYA sebagai harapan/doa di akhir
-5. Tutup dengan "Semoga…" atau kalimat doa
-6. Bahasa: hangat, apresiatif, observatif — seperti Musyrifah yang menyayangi santrinya
+5. Tutup dengan "Semoga\u2026" atau kalimat doa
+6. Bahasa: hangat, apresiatif, observatif \u2014 seperti Musyrifah yang menyayangi santrinya
 7. Sebut santri dengan "Ananda [nama pertama]"
 8. Boleh sebut nama Allah, Rasulullah, atau referensi Islami yang relevan
-9. Jangan terdengar seperti mesin — harus terdengar seperti Musyrifah TaQi${patternBlock}
+9. Jangan terdengar seperti mesin \u2014 harus terdengar seperti Musyrifah TaQi${patternBlock}
 
 DATA SANTRI:
 - Nama: ${namaSantri}
