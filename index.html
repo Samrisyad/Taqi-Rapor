@@ -104,6 +104,8 @@ textarea{resize:vertical}
 
 .ta-evidence{min-height:50px;font-size:12px}
 .ta-narasi{min-height:90px;font-size:12px;line-height:1.7}
+@page{margin:0.54mm 6mm;size:A4 portrait}
+.pt-sec-break{page-break-before:always;break-before:page}
 
 .del-btn{background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;padding:2px 4px;transition:color .15s;border-radius:4px}
 .del-btn:hover{color:#dc2626;background:#fef2f2}
@@ -741,7 +743,7 @@ function buildRaporHTML(data){
 
   // Build assessment tables
   let assessHTML = '';
-  secOrder.forEach(secId=>{
+  secOrder.forEach((secId, idx)=>{
     const sec = secMap[secId];
     let rows = '';
     sec.poin.forEach(p=>{
@@ -749,8 +751,9 @@ function buildRaporHTML(data){
         <tr class="pt-poin-hdr"><td class="pt-poin-no"></td><td><strong>${p.nama}</strong></td></tr>
         <tr><td class="pt-poin-no">${p.no}</td><td class="pt-narasi">${p.narasi||'&nbsp;'}</td></tr>`;
     });
+    const breakCls = idx > 0 ? ' pt-sec-break' : '';
     assessHTML += `
-      <table class="pt-tbl">
+      <table class="pt-tbl${breakCls}">
         <tr>
           <td class="pt-sec-no pt-sec-hdr" style="width:24px">${secId}</td>
           <td class="pt-sec-hdr">${sec.title}</td>
@@ -891,7 +894,7 @@ function downloadPDF(){
   document.body.style.overflow = 'visible';
   const wrapper = document.createElement('div');
   wrapper.className = 'pt';
-  wrapper.style.cssText = 'width:680px;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
+  wrapper.style.cssText = 'width:748px;padding:2px 0;overflow:hidden;box-sizing:border-box;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
   wrapper.innerHTML = buildRaporHTML(data);
   wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse = 'collapse'; t.style.tableLayout = 'fixed'; t.style.width = '100%'; });
   wrapper.querySelectorAll('td,th').forEach(el => { el.style.border = '1px solid #000'; el.style.overflowWrap = 'break-word'; el.style.wordBreak = 'break-word'; });
@@ -906,11 +909,12 @@ function downloadPDF(){
   };
   setTimeout(() => {
     html2pdf().set({
-      margin: [10,15,10,15],
+      margin: [0.54, 6, 0.54, 6],
       filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
       image: { type:'jpeg', quality:0.97 },
       html2canvas: { scale:2, useCORS:true, letterRendering:true, scrollX:0, scrollY:0 },
-      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break' }
     }).from(wrapper).save()
       .then(restore)
       .catch(e => { restore(); alert('Gagal buat PDF: ' + e.message); });
