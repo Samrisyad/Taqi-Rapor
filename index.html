@@ -910,11 +910,11 @@ function downloadPDF(){
   setTimeout(() => {
     html2pdf().set({
       margin: [8, 6, 8, 6],
-      filename: `${nama}_${data.semester}_${data.tahun.replace(/\//g,'-')}.pdf`,
+      filename: `${nama}_${data.semester.replace(/[()]/g,'').trim()}_${data.tahun.replace(/\//g,'-')}.pdf`,
       image: { type:'jpeg', quality:0.97 },
-      html2canvas: { scale:(window.innerWidth<768?1.5:2), useCORS:true, letterRendering:true, scrollX:0, scrollY:0, windowWidth:720, width:720 },
+      html2canvas: { scale:(window.innerWidth<768?1.5:2), useCORS:true, letterRendering:true, scrollX:0, scrollY:0, windowWidth:720 },
       jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
-      pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break', avoid: ['table','tr','td'] }
+      pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break' }
     }).from(wrapper).save()
       .then(restore)
       .catch(e => { restore(); alert('Gagal buat PDF: ' + e.message); });
