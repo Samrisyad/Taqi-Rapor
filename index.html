@@ -902,21 +902,17 @@ function downloadPDF(){
   wrapper.querySelectorAll('td,th').forEach(el => { el.style.border = '1px solid #000'; el.style.overflowWrap = 'break-word'; el.style.wordBreak = 'break-word'; });
   document.body.appendChild(wrapper);
   const nama = document.getElementById('f-nama').value || 'Santri';
-  // Paksa minWidth 720px agar mobile render wrapper dengan benar
-  const origMinWidth = document.documentElement.style.minWidth;
-  document.documentElement.style.minWidth = '720px';
   const restore = () => {
     if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
     allChildren.forEach(el => { el.style.display = el._origDisplay || ''; });
     document.body.style.overflow = '';
-    document.documentElement.style.minWidth = origMinWidth;
   };
   setTimeout(() => {
     html2pdf().set({
       margin: [8, 6, 8, 6],
       filename: `${nama}_${data.semester.replace(/[()]/g,'').trim()}_${data.tahun.replace(/\//g,'-')}.pdf`,
       image: { type:'jpeg', quality:0.97 },
-      html2canvas: { scale:(window.innerWidth<768?1.5:2), useCORS:true, letterRendering:true, scrollX:0, scrollY:0 },
+      html2canvas: { scale:2, useCORS:true, letterRendering:true, scrollX:0, scrollY:0, windowWidth:1920 },
       jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
       pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break' }
     }).from(wrapper).save()
