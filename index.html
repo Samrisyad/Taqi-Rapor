@@ -896,14 +896,12 @@ function downloadPDF(){
   document.body.style.overflow = 'visible';
   const wrapper = document.createElement('div');
   wrapper.className = 'pt';
-  wrapper.style.cssText = 'width:748px;padding:2px 0;overflow:hidden;box-sizing:border-box;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
+  wrapper.style.cssText = 'width:720px;padding:2px 0;overflow:hidden;box-sizing:border-box;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
   wrapper.innerHTML = buildRaporHTML(data);
   wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse = 'collapse'; t.style.tableLayout = 'fixed'; t.style.width = '100%'; });
   wrapper.querySelectorAll('td,th').forEach(el => { el.style.border = '1px solid #000'; el.style.overflowWrap = 'break-word'; el.style.wordBreak = 'break-word'; });
   document.body.appendChild(wrapper);
   const nama = document.getElementById('f-nama').value || 'Santri';
-  const sem  = data.semester.replace(/\s/g,'');
-  const tahun= data.tahun;
   const restore = () => {
     if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
     allChildren.forEach(el => { el.style.display = el._origDisplay || ''; });
@@ -911,8 +909,8 @@ function downloadPDF(){
   };
   setTimeout(() => {
     html2pdf().set({
-      margin: [0.54, 6, 0.54, 6],
-      filename: `Rapor_${nama}_${sem}_${tahun}.pdf`,
+      margin: [8, 6, 8, 6],
+      filename: `${nama}_${data.semester}_${data.tahun.replace(/\//g,'-')}.pdf`,
       image: { type:'jpeg', quality:0.97 },
       html2canvas: { scale:2, useCORS:true, letterRendering:true, scrollX:0, scrollY:0 },
       jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
