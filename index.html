@@ -225,6 +225,8 @@ textarea{resize:vertical}
   .preview-a4{zoom:0.48;width:720px;max-width:none;padding:10mm 10mm;box-shadow:none;margin:8px auto}
   .ta-narasi{min-height:80px}
   .sec-hdr{flex-wrap:wrap;gap:4px}
+  .btn-dl-mobile{display:inline-flex!important}
+  .btn-dl-desktop{display:none!important}
 }
 </style>
 </head>
@@ -408,7 +410,8 @@ textarea{resize:vertical}
   <div class="bottom-bar-left">
     <button class="btn btn-outline" onclick="openPreview()">👁 Pratinjau Rapor</button>
   </div>
-  <button class="btn btn-success" onclick="downloadPDF()">⬇ Unduh PDF</button>
+  <button class="btn btn-success btn-dl-desktop" onclick="downloadPDF()">⬇ Unduh PDF</button>
+  <button class="btn btn-success btn-dl-mobile" style="display:none" onclick="downloadPDFMobile()">⬇ Unduh PDF (HP)</button>
 </div>
 
 <!-- PREVIEW MODAL -->
@@ -913,6 +916,41 @@ function downloadPDF(){
       filename: `${nama}_${data.semester.replace(/[()]/g,'').trim()}_${data.tahun.replace(/\//g,'-')}.pdf`,
       image: { type:'jpeg', quality:0.97 },
       html2canvas: { scale:2, useCORS:true, letterRendering:true, scrollX:0, scrollY:0, onclone:(clonedDoc)=>{ clonedDoc.documentElement.style.width='720px'; clonedDoc.documentElement.style.minWidth='720px'; clonedDoc.documentElement.style.overflow='hidden'; } },
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break' }
+    }).from(wrapper).save()
+      .then(restore)
+      .catch(e => { restore(); alert('Gagal buat PDF: ' + e.message); });
+  }, 400);
+}
+
+// ══════════════════════════════════════════
+// PDF DOWNLOAD — MOBILE
+// ══════════════════════════════════════════
+function downloadPDFMobile(){
+  const data = getForm();
+  const allChildren = Array.from(document.body.children);
+  allChildren.forEach(el => { el._origDisplay = el.style.display; el.style.display = 'none'; });
+  document.body.style.overflow = 'visible';
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pt';
+  wrapper.style.cssText = 'width:720px;padding:2px 0;overflow:hidden;box-sizing:border-box;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
+  wrapper.innerHTML = buildRaporHTML(data);
+  wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse='collapse'; t.style.tableLayout='fixed'; t.style.width='100%'; });
+  wrapper.querySelectorAll('td,th').forEach(el => { el.style.border='1px solid #000'; el.style.overflowWrap='break-word'; el.style.wordBreak='break-word'; });
+  document.body.appendChild(wrapper);
+  const nama = document.getElementById('f-nama').value || 'Santri';
+  const restore = () => {
+    if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+    allChildren.forEach(el => { el.style.display = el._origDisplay || ''; });
+    document.body.style.overflow = '';
+  };
+  setTimeout(() => {
+    html2pdf().set({
+      margin: [8, 6, 8, 6],
+      filename: `${nama}_${data.semester.replace(/[()]/g,'').trim()}_${data.tahun.replace(/\//g,'-')}.pdf`,
+      image: { type:'jpeg', quality:0.97 },
+      html2canvas: { scale:(window.devicePixelRatio||1), useCORS:true, letterRendering:true, scrollX:0, scrollY:0, windowWidth:720 },
       jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
       pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break' }
     }).from(wrapper).save()
