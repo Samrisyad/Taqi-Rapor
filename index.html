@@ -925,38 +925,58 @@ function downloadPDF(){
 }
 
 // ══════════════════════════════════════════
-// PDF DOWNLOAD — MOBILE
+// PDF DOWNLOAD — MOBILE (window.print)
 // ══════════════════════════════════════════
 function downloadPDFMobile(){
   const data = getForm();
-  const allChildren = Array.from(document.body.children);
-  allChildren.forEach(el => { el._origDisplay = el.style.display; el.style.display = 'none'; });
-  document.body.style.overflow = 'visible';
-  const wrapper = document.createElement('div');
-  wrapper.className = 'pt';
-  wrapper.style.cssText = 'width:720px;padding:2px 0;overflow:hidden;box-sizing:border-box;background:#fff;font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;';
-  wrapper.innerHTML = buildRaporHTML(data);
-  wrapper.querySelectorAll('table').forEach(t => { t.style.borderCollapse='collapse'; t.style.tableLayout='fixed'; t.style.width='100%'; });
-  wrapper.querySelectorAll('td,th').forEach(el => { el.style.border='1px solid #000'; el.style.overflowWrap='break-word'; el.style.wordBreak='break-word'; });
-  document.body.appendChild(wrapper);
   const nama = document.getElementById('f-nama').value || 'Santri';
-  const restore = () => {
-    if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
-    allChildren.forEach(el => { el.style.display = el._origDisplay || ''; });
-    document.body.style.overflow = '';
-  };
-  setTimeout(() => {
-    html2pdf().set({
-      margin: [8, 6, 8, 6],
-      filename: `${nama}_${data.semester.replace(/[()]/g,'').trim()}_${data.tahun.replace(/\//g,'-')}.pdf`,
-      image: { type:'jpeg', quality:0.97 },
-      html2canvas: { scale:(window.devicePixelRatio||1), useCORS:true, letterRendering:true, scrollX:0, scrollY:0, windowWidth:720 },
-      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
-      pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break' }
-    }).from(wrapper).save()
-      .then(restore)
-      .catch(e => { restore(); alert('Gagal buat PDF: ' + e.message); });
-  }, 400);
+  const raporHTML = buildRaporHTML(data);
+  const printCSS = `
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:"Times New Roman",Times,serif;font-size:10pt;color:#000;background:#fff}
+    @page{margin:8mm 6mm;size:A4 portrait}
+    .pt-sec-break{page-break-before:always;break-before:page}
+    .pt-hdr{display:flex;align-items:flex-start;gap:14px;border-bottom:2.5px solid #000;padding-bottom:10px;margin-bottom:10px}
+    .pt-school-info{flex:1}
+    .pt-bismillah{text-align:right;font-size:16pt;margin-bottom:4px}
+    .pt-sname{font-size:14pt;font-weight:900;margin-bottom:2px}
+    .pt-saddr{font-size:8.5pt;color:#111;line-height:1.65}
+    .pt-title{text-align:center;margin:10px 0}
+    .pt-title-main{font-size:11.5pt;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+    .pt-title-sub{font-size:10.5pt;font-weight:700;margin-top:3px}
+    .pt-sinfo{margin-bottom:10px;font-size:9.5pt;display:grid;grid-template-columns:1fr 1fr;gap:2px 16px}
+    .pt-si{display:flex;gap:4px}
+    .pt-si-key{min-width:105px;font-weight:700}
+    .pt-tbl{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:9.5pt;table-layout:fixed}
+    .pt-tbl td,.pt-tbl th{border:1px solid #000;padding:3px 6px;vertical-align:top;overflow-wrap:break-word;word-break:break-word}
+    .pt-sec-hdr{background:#3a3a3a;color:#fff;font-weight:700;font-size:9.5pt;vertical-align:middle;text-align:center}
+    .pt-sec-no{width:24px;text-align:center;vertical-align:middle;font-weight:700}
+    .pt-poin-hdr td{font-weight:700;background:#f0f0f0;font-size:9.5pt}
+    .pt-poin-no{width:24px;text-align:center;vertical-align:middle}
+    .pt-narasi{min-height:56px;font-size:9.5pt;line-height:1.6;padding:4px 6px}
+    .pt-abs-wrap{margin-bottom:8px}
+    .pt-abs-tbl{border-collapse:collapse;font-size:9.5pt}
+    .pt-abs-tbl th,.pt-abs-tbl td{border:1px solid #000;padding:3px 14px;text-align:center}
+    .pt-abs-tbl th{background:#f0f0f0;font-weight:700}
+    .pt-abs-tbl td:first-child{font-weight:700;text-align:left;padding-left:8px}
+    .pt-sign-date{font-size:9.5pt;margin:8px 0}
+    .pt-sign-tbl{width:100%;border-collapse:collapse;font-size:9.5pt}
+    .pt-sign-tbl td{border:1px solid #000;padding:4px 10px;text-align:center;width:33.33%;vertical-align:top}
+    .pt-sign-space{height:56px}
+    .pt-sign-name{font-weight:700;border-top:1px solid #000;padding-top:3px}
+    .pt-sign-role{font-size:8.5pt;margin-top:1px}
+    .pt-catatan{margin-top:8px;font-size:9.5pt}
+  `;
+  const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>${nama} - Rapor TaQi</title>
+    <style>${printCSS}</style>
+  </head><body>${raporHTML}
+  <script>window.onload=function(){setTimeout(function(){window.print();},600);};<\/script>
+  </body></html>`;
+  const pw = window.open('','_blank');
+  if(!pw){ alert('Izinkan pop-up untuk membuka halaman cetak.'); return; }
+  pw.document.write(fullHTML);
+  pw.document.close();
 }
 
 // ══════════════════════════════════════════
