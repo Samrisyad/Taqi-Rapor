@@ -337,11 +337,6 @@ textarea{resize:vertical}
           <input type="text" id="f-nisn" placeholder="Isi manual atau auto-fill dari database">
         </div>
         <div class="fg">
-          <label class="lbl">NIPD</label>
-          <input type="text" id="f-nipd" placeholder="Isi manual atau auto-fill dari database">
-        </div>
-
-        <div class="fg">
           <label class="lbl">Kelas</label>
           <select id="f-kelas" onchange="onKelasChange(this.value)">
             <option value="TODDLER">TODDLER</option>
@@ -701,17 +696,16 @@ function onNamaInput(val){
   const matches = state.santriList.filter(s=>s.nama.toLowerCase().includes(val.toLowerCase())).slice(0,8);
   if(!matches.length){ list.classList.remove('show'); return; }
   list.innerHTML = matches.map(s=>`
-    <div class="ac-item" onmousedown="selectSantri('${escQ(s.nama)}','${s.nisn}','${s.nipd}','${s.kelas}','${s.cabang}')">
+    <div class="ac-item" onmousedown="selectSantri('${escQ(s.nama)}','${s.nisn}','${s.kelas}','${s.cabang}')">
       <div class="ac-name">${s.nama}</div>
       <div class="ac-sub">${s.nisn} · ${s.kelas} · ${s.cabang}</div>
     </div>`).join('');
   list.classList.add('show');
 }
 
-function selectSantri(nama, nisn, nipd, kelas, cabang){
+function selectSantri(nama, nisn, kelas, cabang){
   document.getElementById('f-nama').value = nama;
   document.getElementById('f-nisn').value = nisn;
-  document.getElementById('f-nipd').value = nipd;
   // Auto-set kelas & cabang if they match dropdown options
   const kelasEl = document.getElementById('f-kelas');
   for(let o of kelasEl.options){ if(o.value===kelas){ kelasEl.value=kelas; break; } }
@@ -765,7 +759,6 @@ function getForm(){
   return {
     nama:     document.getElementById('f-nama').value || '___________________',
     nisn:     document.getElementById('f-nisn').value || '___________________',
-    nipd:     document.getElementById('f-nipd').value || '',
     kelas:    document.getElementById('f-kelas').value,
     semester: document.getElementById('f-semester').value,
     tahun:    document.getElementById('f-tahun').value || '2025/2026',
@@ -965,7 +958,6 @@ function saveToDatabase(){
     timestamp:   new Date().toLocaleString('id-ID'),
     nama:        data.nama,
     nik:         data.nisn,
-    nipd:        data.nipd,
     kelas:       data.kelas,
     semester:    data.semester,
     tahunAjaran: data.tahun,
@@ -1084,9 +1076,7 @@ function downloadPDFMobile(){
 // ══════════════════════════════════════════
 function clearForm(){
   if(!confirm('Reset semua data?')) return;
-  ['f-nama','f-nisn','f-nipd','f-walikelas','f-nip','f-catatan'].forEach(id=>{ document.getElementById(id).value=''; });
-  document.getElementById('f-nisn').readOnly=true;
-  document.getElementById('f-nipd').readOnly=true;
+  ['f-nama','f-nisn','f-walikelas','f-nip','f-catatan'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('f-tahun').value='2025/2026';
   document.getElementById('abs-sakit').value='0';
   document.getElementById('abs-izin').value='0';
@@ -1101,51 +1091,210 @@ function clearForm(){
 }
 
 // ══════════════════════════════════════════
-// LOAD CONTOH DATA (Faiza Az Zahra)
+// CONTOH DATA — NARRATIVE CONTEXT PER POIN
+// ══════════════════════════════════════════
+const CONTOH_LEVELS = {
+  'Akhlak Kepada Guru':'BCB','Akhlak Kepada Teman':'BSB','Kemandirian':'BCB',
+  'Kedisiplinan':'BCB','Karakter Kekhalifahan':'BSB','Sosial Emosional':'MB',
+  "Tahfidz Qur'an":'BCB',"Tahsin Karimah & Al-Qur'an":'BCB',
+  'Hadits':'BSB','Doa':'BSB','Asmaul Husna':'BCB','Syair Islami':'BCB',
+  'Dalil':'BCB','Ibadah Sholat':'BSB','Bahasa Arab Dan Inggris':'BCB',
+  "Tadabbur Al-Qur'an":'BCB',"Terjemah Al-Qur'an":'BCB',
+  'Tauhid : Mengenal Allah':'BCB','Tauhid : Rukun Islam':'BCB',
+  'Materi Fiqih':'BCB','Fiqih':'BCB','Adab dan Akhlaq':'BSB','Materi Tema':'BCB',
+  'Kisah Nabi dan Para Sahabat':'BSB','Kisah Ilmuwan Muslim dan Sifat Rasulullah ﷺ':'BCB',
+  'Kemampuan Bahasa':'BSB','Kognitif':'BCB','Motorik':'BCB','Kreatifitas':'BSB',
+};
+
+const POIN_DOMAIN_MAP_FE = {
+  'Akhlak Kepada Guru':'AKHLAK GURU','Akhlak Kepada Teman':'AKHLAK TEMAN',
+  'Kemandirian':'KEMANDIRIAN','Kedisiplinan':'KEDISIPLINAN',
+  'Karakter Kekhalifahan':'KARAKTER KEKHALIFAHAN','Sosial Emosional':'SOSIAL EMOSIONAL',
+  "Tahfidz Qur'an":'TAHFIDZ',"Tahsin Karimah & Al-Qur'an":'TAHSIN',
+  'Hadits':'HADITS','Doa':'DOA','Asmaul Husna':'ASMAUL HUSNA','Syair Islami':'SYAIR ISLAMI',
+  'Dalil':'DALIL','Ibadah Sholat':'IBADAH SHOLAT','Bahasa Arab Dan Inggris':'BAHASA ARAB',
+  "Tadabbur Al-Qur'an":'TADABBUR',"Terjemah Al-Qur'an":"TERJEMAH QUR'AN",
+  'Tauhid : Mengenal Allah':'TAUHID','Tauhid : Rukun Islam':'TAUHID',
+  'Materi Fiqih':'MATERI FIKIH','Fiqih':'MATERI FIKIH','Adab dan Akhlaq':'ADAB AKHLAQ',
+  'Materi Tema':'MATERI TEMA','Kisah Nabi dan Para Sahabat':'KISAH NABI',
+  'Kisah Ilmuwan Muslim dan Sifat Rasulullah ﷺ':'KISAH TELADAN',
+  'Kemampuan Bahasa':'KEMAMPUAN BAHASA','Kognitif':'KOGNITIF',
+  'Motorik':'MOTORIK','Kreatifitas':'KREATIFITAS',
+};
+
+const NC = {
+  'AKHLAK GURU':{
+    MB:{a:'Alhamdulillah Ananda mulai menunjukkan sikap yang baik terhadap Musyrifah.',e:'mulai merespon panggilan Musyrifah, sesekali mengucapkan salam, mulai mengikuti arahan sederhana',h:'Semoga Ananda semakin terbiasa bersikap santun dan senantiasa berakhlak mulia kepada Musyrifah.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan sikap yang baik terhadap Musyrifah.',e:'memberi salam saat bertemu, mengucapkan tolong, maaf, dan terima kasih, merespon arahan dengan cukup baik',h:'Semoga Ananda semakin istiqomah menjaga akhlak yang baik kepada Musyrifah maupun guru lainnya.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan akhlak yang sangat baik terhadap Musyrifah.',e:'selalu memberi salam saat bertemu, bertutur kata santun, merespon arahan dengan sangat baik, menunjukkan rasa hormat secara konsisten',h:'Semoga Ananda senantiasa menjaga akhlak mulia tersebut dan menjadi teladan yang baik bagi teman-temannya.'},
+  },
+  'AKHLAK TEMAN':{
+    MB:{a:'Alhamdulillah Ananda mulai belajar berinteraksi dengan baik bersama teman-temannya.',e:'mulai bermain bersama teman, mulai belajar berbagi mainan, masih memerlukan arahan saat terjadi perbedaan pendapat',h:'Semoga Ananda semakin terbiasa berbagi, bekerja sama, dan menunjukkan sikap yang baik kepada teman-temannya.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan hubungan yang baik dengan teman-temannya.',e:'bermain bersama secara positif, mampu berbagi alat bermain, bekerja sama dalam kegiatan kelompok',h:'Semoga Ananda terus menjaga sikap saling menghargai dan menyayangi sesama teman.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan akhlak yang sangat baik kepada teman-temannya.',e:'aktif membantu teman, menjaga kerukunan kelompok, mampu menjadi penengah saat terjadi perselisihan sederhana',h:'Semoga Allah menjaga akhlak mulia Ananda dan menjadikannya sahabat yang membawa keberkahan bagi banyak orang.'},
+  },
+  'KEMANDIRIAN':{
+    MB:{a:'Alhamdulillah Ananda mulai menunjukkan kemandirian dalam kegiatan sehari-hari.',e:'mulai merapikan perlengkapan pribadi, mencoba menyelesaikan tugas sendiri, masih membutuhkan arahan dalam beberapa aktivitas',h:'Semoga Ananda semakin semangat belajar bertanggung jawab terhadap dirinya sendiri.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan kemandirian yang baik dalam berbagai aktivitas.',e:'merapikan perlengkapan sendiri, menyelesaikan tugas dengan cukup mandiri, menjaga kebutuhan pribadi dengan baik',h:'Semoga Ananda terus menjaga semangat dan tanggung jawab dalam setiap aktivitas yang dilakukan.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemandirian yang sangat baik dalam berbagai kegiatan.',e:'menyelesaikan tugas secara mandiri, bertanggung jawab terhadap perlengkapan pribadi, mampu mengatur kebutuhan dirinya dengan baik',h:'Semoga Allah menjaga karakter kuat ini dan menjadikannya bekal dalam meraih cita-cita yang mulia.'},
+  },
+  'KEDISIPLINAN':{
+    MB:{a:'Alhamdulillah Ananda mulai menunjukkan pemahaman terhadap aturan dan rutinitas sekolah.',e:'mulai mengikuti jadwal kegiatan harian, berusaha datang tepat waktu, masih memerlukan pengingat dalam beberapa aktivitas',h:'Semoga Ananda semakin terbiasa menjalankan kegiatan dengan tertib dan bertanggung jawab.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan kedisiplinan yang baik dalam kegiatan sekolah.',e:'datang tepat waktu, mengikuti kegiatan sesuai jadwal, mematuhi aturan kelas dengan baik',h:'Semoga Ananda terus menjaga kebiasaan baik ini dalam kesehariannya.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kedisiplinan yang sangat baik dalam berbagai kegiatan.',e:'konsisten mengikuti aturan, datang tepat waktu, menjaga ketertiban tanpa perlu diingatkan',h:'Semoga Allah menjaga karakter disiplin ini dan menjadikannya bekal meraih keberhasilan di masa depan.'},
+  },
+  'KARAKTER KEKHALIFAHAN':{
+    MB:{a:'Alhamdulillah Ananda mulai menunjukkan keberanian dalam menyampaikan pendapat.',e:'mulai aktif menjawab pertanyaan, berani tampil di depan kelompok kecil, masih memerlukan dukungan untuk memimpin kegiatan',h:'Semoga Allah menumbuhkan keberanian dan tanggung jawab dalam diri Ananda.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan karakter kepemimpinan yang baik dalam berbagai kegiatan.',e:'berani menyampaikan pendapat, mampu mengajak teman bekerja sama, menunjukkan rasa tanggung jawab terhadap kelompok',h:'Semoga Allah menjadikan Ananda pemimpin yang membawa manfaat dan kebaikan.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan karakter kekhalifahan yang sangat baik.',e:'percaya diri memimpin kelompok, mampu mengorganisasi teman, bertanggung jawab terhadap tugas bersama',h:'Semoga Allah menjadikan Ananda pemimpin yang amanah, adil, dan dicintai banyak orang.'},
+  },
+  'SOSIAL EMOSIONAL':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenali dan mengungkapkan perasaannya dengan baik.',e:'mampu menyampaikan rasa senang atau sedih, mulai memahami perasaan teman, masih memerlukan bantuan dalam mengelola emosi tertentu',h:'Semoga Allah menumbuhkan ketenangan hati dan kemampuan mengelola emosi dengan baik.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan sosial emosional yang baik.',e:'mampu mengungkapkan perasaan dengan tepat, menunjukkan empati kepada teman, mampu beradaptasi dalam berbagai kegiatan',h:'Semoga Allah menjaga kelembutan hati dan empati dalam diri Ananda.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kematangan sosial emosional yang sangat baik.',e:'mampu mengelola emosi secara mandiri, menunjukkan empati yang tinggi, mampu menjaga hubungan yang harmonis dengan teman',h:'Semoga Allah menjaga kelembutan hati dan kebijaksanaan Ananda dalam berinteraksi dengan sesama.'},
+  },
+  'TAHFIDZ':{
+    MB:{a:"Alhamdulillah Ananda mulai menunjukkan semangat dalam menghafalkan ayat-ayat Al-Qur'an.",e:"mampu mengikuti muroja'ah bersama, mulai menghafal beberapa ayat dengan bantuan, masih memerlukan pengulangan yang konsisten",h:"Semoga Allah memudahkan Ananda dalam menghafal ayat-ayat-Nya dan menumbuhkan kecintaan terhadap Al-Qur'an sejak dini."},
+    BCB:{a:"Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam hafalan Al-Qur'an.",e:"muroja'ah dengan baik, mampu melanjutkan ayat yang dibacakan, menunjukkan ketekunan dalam menghafal",h:'Semoga Allah menjaga hafalan Ananda dan menambah keberkahan ilmu yang dipelajarinya.'},
+    BSB:{a:"MasyaAllah Ananda menunjukkan kemampuan hafalan Al-Qur'an yang sangat baik.",e:"mampu muroja'ah mandiri, hafalan stabil, mampu mengikuti tasmi' dengan baik",h:"Semoga Allah menjadikan Ananda ahlul Qur'an yang mengamalkan dan menjaga kalam-Nya sepanjang hayat."},
+  },
+  'TAHSIN':{
+    MB:{a:"Alhamdulillah Ananda mulai menunjukkan perkembangan dalam membaca Al-Qur'an.",e:'mengikuti talaqqi dengan baik, mulai memperhatikan makhraj, membutuhkan bimbingan dalam kelancaran bacaan',h:"Semoga Allah memudahkan Ananda dalam membaca Al-Qur'an dengan baik dan benar."},
+    BCB:{a:"Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam tahsin Al-Qur'an.",e:'memperhatikan panjang pendek bacaan, mengikuti koreksi dengan baik, menunjukkan kemajuan dalam makhraj',h:"Semoga Allah menjaga semangat Ananda dalam mempelajari dan membaca Al-Qur'an."},
+    BSB:{a:"MasyaAllah Ananda menunjukkan kemampuan membaca Al-Qur'an yang sangat baik.",e:'makhraj baik, memperhatikan hukum bacaan, mampu memperbaiki kesalahan secara mandiri',h:"Semoga Allah menjadikan bacaan Al-Qur'an Ananda semakin indah dan penuh keberkahan."},
+  },
+  'HADITS':{
+    MB:{a:"Alhamdulillah Ananda mulai mengenal hadits-hadits pilihan yang dipelajari.",e:"mengikuti muroja'ah hadits bersama, mulai mengingat lafadz hadits, masih memerlukan pengulangan yang konsisten",h:'Semoga Allah memudahkan Ananda dalam menghafal dan mengamalkan hadits-hadits Rasulullah ﷺ.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam hafalan hadits.',e:"menghafal lafadz hadits dengan cukup lancar, mengikuti muroja'ah dengan baik, mulai memahami makna sederhana dari hadits",h:'Semoga Allah menjadikan hadits Rasulullah ﷺ sebagai pedoman dalam kehidupan Ananda.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam hafalan hadits.',e:"hafalan kuat dan stabil, mampu mengikuti tasmi' hadits dengan baik, menunjukkan usaha mengamalkan pesan hadits",h:'Semoga Allah menjadikan Ananda generasi yang mencintai sunnah Rasulullah ﷺ.'},
+  },
+  'DOA':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal doa-doa harian yang dipelajari.',e:'mengikuti muroja\'ah doa bersama, mulai mengingat lafadz doa sederhana, masih memerlukan bimbingan dalam pelafalan',h:'Semoga Allah menumbuhkan kecintaan Ananda untuk selalu mengingat-Nya melalui doa.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam hafalan doa harian.',e:'membaca doa pada waktu yang sesuai, mengikuti muroja\'ah dengan baik, memahami makna sederhana beberapa doa',h:'Semoga Allah menjaga kebiasaan baik ini dan menjadikan doa sebagai kebutuhan dalam hidup Ananda.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam hafalan doa harian.',e:'hafalan doa kuat, terbiasa membaca doa tanpa diingatkan, memahami fungsi beberapa doa yang dipelajari',h:'Semoga Allah senantiasa menjaga hati Ananda agar dekat dengan-Nya melalui doa-doa yang dipanjatkan.'},
+  },
+  'DALIL':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal dalil-dalil pilihan yang dipelajari.',e:'mulai menghafal potongan ayat atau dalil, mengikuti muroja\'ah bersama, masih memerlukan pengulangan yang konsisten',h:'Semoga Allah memudahkan Ananda dalam mengenal dan mencintai dalil-dalil agama-Nya.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam menghafal dalil.',e:'hafalan berkembang sesuai target, mampu mengikuti muroja\'ah, mulai mengaitkan dalil dengan materi yang dipelajari',h:'Semoga Allah menjadikan ilmu yang dipelajari Ananda bermanfaat dan penuh keberkahan.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam hafalan dalil.',e:'hafalan kuat, mampu menjelaskan keterkaitan sederhana dengan materi pembelajaran, aktif saat muroja\'ah',h:'Semoga Allah menjadikan Ananda pribadi yang mencintai ilmu dan menjadikan dalil sebagai pedoman hidup.'},
+  },
+  'IBADAH SHOLAT':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal gerakan dan bacaan sholat.',e:'mengikuti praktik sholat berjamaah, mulai mengenali urutan gerakan, masih memerlukan arahan dalam bacaan',h:'Semoga Allah menumbuhkan kecintaan Ananda terhadap sholat sejak usia dini.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam praktik sholat.',e:'mengikuti gerakan dengan benar, menghafal sebagian bacaan sholat, menjaga adab saat sholat berjamaah',h:'Semoga Allah menjadikan sholat sebagai kebutuhan dan cahaya dalam kehidupan Ananda.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan perkembangan yang sangat baik dalam ibadah sholat.',e:'mengikuti sholat berjamaah dengan tertib, memahami urutan gerakan, menunjukkan kesungguhan saat beribadah',h:'Semoga Allah menjaga semangat ibadah Ananda dan menjadikannya hamba yang mencintai sholat.'},
+  },
+  'BAHASA ARAB':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal kosakata Bahasa Arab dan Inggris yang dipelajari.',e:'mengikuti pengulangan mufrodat bersama, mengenali beberapa kosakata yang sering digunakan, masih memerlukan bantuan dalam pengucapan',h:'Semoga Allah memudahkan Ananda dalam mengenal dan mencintai bahasa-bahasa yang mulia.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam pembelajaran Bahasa Arab dan Inggris.',e:'mengenali kosakata yang dipelajari, mampu menjawab pertanyaan sederhana, menunjukkan antusiasme saat kegiatan bahasa',h:'Semoga Allah menumbuhkan semangat belajar bahasa dalam diri Ananda.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam Bahasa Arab dan Inggris.',e:'hafalan mufrodat kuat, aktif saat pembelajaran, mampu menghubungkan kosakata dengan konteks yang tepat',h:'Semoga Allah menjadikan bahasa sebagai pintu ilmu dan keberkahan bagi Ananda.'},
+  },
+  'TADABBUR':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal makna sederhana dari ayat dan materi yang dipelajari.',e:'mendengarkan kisah dan penjelasan dengan baik, menjawab pertanyaan sederhana, mulai menghubungkan pelajaran dengan kehidupan sehari-hari',h:'Semoga Allah menumbuhkan hati yang senantiasa bersyukur dan gemar mengambil pelajaran.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan pemahaman yang baik dalam kegiatan tadabbur.',e:'aktif dalam diskusi sederhana, mampu menceritakan kembali pelajaran yang diperoleh, menghubungkan nilai Islam dengan pengalaman sehari-hari',h:'Semoga Allah menjadikan Ananda pribadi yang senantiasa berpikir, bersyukur, dan mengambil hikmah.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan pemahaman yang sangat baik dalam kegiatan tadabbur.',e:'aktif menyampaikan pendapat, menunjukkan refleksi yang baik, mampu menghubungkan pelajaran dengan kehidupan nyata',h:'Semoga Allah menjadikan Ananda pribadi yang bijaksana dan dekat dengan petunjuk-Nya.'},
+  },
+  "TERJEMAH QUR'AN":{
+    MB:{a:"Alhamdulillah Ananda mulai mengenal makna sederhana dari ayat-ayat yang dipelajari.",e:"mengikuti pembelajaran dengan baik, mengenali arti sederhana, masih memerlukan penguatan dalam mengingat makna",h:"Semoga Allah memudahkan Ananda dalam memahami dan mencintai Al-Qur'an."},
+    BCB:{a:"Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam memahami terjemah Al-Qur'an.",e:'mengingat arti ayat yang dipelajari, mampu menjawab pertanyaan sederhana, menunjukkan minat terhadap makna Al-Qur\'an',h:"Semoga Allah menjadikan Al-Qur'an sebagai petunjuk yang senantiasa dekat dengan hati Ananda."},
+    BSB:{a:"MasyaAllah Ananda menunjukkan pemahaman yang sangat baik terhadap terjemah ayat yang dipelajari.",e:'mengingat arti dengan baik, mampu menghubungkan makna dengan kehidupan sehari-hari, aktif saat pembelajaran',h:"Semoga Allah menjadikan Ananda generasi Qur'ani yang memahami dan mengamalkan petunjuk-Nya."},
+  },
+  'ASMAUL HUSNA':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal nama-nama Allah yang dipelajari.',e:'mengikuti muroja\'ah bersama, mengenali beberapa nama Allah, masih memerlukan pengulangan yang konsisten',h:'Semoga Allah menumbuhkan kecintaan Ananda untuk semakin mengenal Rabb-nya.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam hafalan Asmaul Husna.',e:'hafalan berkembang sesuai target, mengikuti muroja\'ah dengan baik, memahami makna dasar beberapa nama Allah',h:'Semoga Allah menjadikan Ananda pribadi yang semakin mengenal dan mencintai-Nya.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan perkembangan yang sangat baik dalam Asmaul Husna.',e:'hafalan lancar, mengenali makna dengan baik, menunjukkan antusiasme saat pembelajaran',h:'Semoga Allah menjaga hati Ananda agar senantiasa dekat dengan-Nya dan bertumbuh dalam keimanan.'},
+  },
+  'SYAIR ISLAMI':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal syair Islami yang dipelajari semester ini.',e:'mengikuti pembacaan syair bersama, mulai mengingat bait-bait syair, sesekali tampil dengan semangat',h:'Semoga Allah menumbuhkan kecintaan Ananda terhadap keindahan syair dan seni Islami.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam syair Islami.',e:'mampu menghafal dan mengikuti sebagian bait syair, tampil dengan cukup percaya diri, mengikuti irama dengan baik',h:'Semoga Allah menjaga semangat Ananda dalam mengekspresikan keindahan Islam melalui syair.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam syair Islami.',e:'hafal syair dengan sangat lancar, tampil ekspresif dan percaya diri di depan teman, menjadi inspirasi bagi kelas',h:'Semoga Allah menjadikan kemampuan Ananda sebagai sarana mengungkapkan keindahan Islam.'},
+  },
+  'TAUHID':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal Allah sebagai Rabb yang menciptakan dirinya dan seluruh alam semesta.',e:'mengenal bahwa Allah adalah Pencipta, mampu menjawab pertanyaan sederhana tentang ciptaan Allah, menunjukkan rasa kagum terhadap alam sekitar',h:'Semoga Allah menumbuhkan kecintaan dan keyakinan yang kuat dalam hati Ananda sejak usia dini.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan pemahaman yang baik tentang konsep tauhid yang dipelajari.',e:'menyebutkan nikmat Allah dalam kehidupan, menunjukkan rasa syukur, mampu menghubungkan pelajaran dengan kebesaran Allah',h:'Semoga Allah menjaga fitrah keimanan Ananda dan menumbuhkannya menjadi pribadi yang bertauhid kuat.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan pemahaman yang sangat baik terhadap nilai-nilai tauhid yang dipelajari.',e:'menunjukkan rasa syukur yang konsisten, mengaitkan berbagai nikmat kepada Allah, aktif dalam diskusi tentang kebesaran Allah',h:'Semoga Allah menjaga hati Ananda agar senantiasa mengenal, mencintai, dan bergantung hanya kepada-Nya.'},
+  },
+  'MATERI FIKIH':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal konsep fikih sederhana sesuai materi pembelajaran.',e:'mengikuti praktik sederhana, mengenali aturan dasar, masih memerlukan bimbingan dalam penerapan',h:'Semoga Allah memudahkan Ananda memahami dan mengamalkan ilmu yang dipelajari.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam materi fikih.',e:'mengikuti praktik dengan baik, memahami langkah-langkah sederhana, menunjukkan kesungguhan saat pembelajaran',h:'Semoga Allah menjaga semangat belajar dan mengamalkan ilmu yang telah dipelajari.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan pemahaman yang sangat baik dalam materi fikih.',e:'mengikuti praktik secara mandiri, memahami tujuan dari materi yang dipelajari, menunjukkan konsistensi dalam penerapan',h:'Semoga Allah menjadikan ilmu yang dipelajari sebagai amal yang bermanfaat sepanjang hayat.'},
+  },
+  'ADAB AKHLAQ':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal dan mempraktikkan adab dalam keseharian.',e:'mulai menerapkan adab sederhana, merespon baik saat diingatkan, menunjukkan minat terhadap materi adab',h:'Semoga Allah memudahkan Ananda dalam menghayati dan mempraktikkan adab yang baik.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan yang baik dalam adab dan akhlaq.',e:'mempraktikkan adab yang dipelajari dengan cukup baik, konsisten dalam beberapa situasi, menunjukkan pemahaman yang berkembang',h:'Semoga Allah menjaga dan memperkuat akhlak mulia Ananda dalam kesehariannya.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan penerapan adab dan akhlaq yang sangat baik.',e:'mempraktikkan adab secara konsisten, menjadi contoh baik bagi teman, menunjukkan pemahaman yang mendalam',h:'Semoga Allah menjaga akhlak mulia Ananda sehingga menjadi kebiasaan yang langgeng sepanjang hidupnya.'},
+  },
+  'KISAH NABI':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal kisah para nabi yang dipelajari.',e:'mendengarkan kisah dengan antusias, mengenali nama nabi yang dipelajari, mampu menceritakan kembali sebagian kisah',h:'Semoga Allah menumbuhkan kecintaan Ananda kepada para nabi dan rasul-Nya.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan pemahaman yang baik terhadap kisah nabi yang dipelajari.',e:'menjawab pertanyaan dengan baik, menceritakan kembali kisah secara sederhana, mengenali nilai-nilai positif yang terkandung',h:'Semoga Allah menjadikan kisah para nabi sebagai inspirasi dalam kehidupan Ananda.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan pemahaman yang sangat baik terhadap kisah nabi yang dipelajari.',e:'aktif berdiskusi, mampu menghubungkan kisah dengan kehidupan sehari-hari, menunjukkan ketertarikan yang tinggi',h:'Semoga Allah menumbuhkan semangat untuk meneladani akhlak para nabi dalam kesehariannya.'},
+  },
+  'KISAH TELADAN':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal tokoh-tokoh teladan yang dipelajari.',e:'mendengarkan cerita dengan baik, mengenali perilaku yang baik dalam kisah, mampu menyebutkan pelajaran sederhana',h:'Semoga Allah memudahkan Ananda mengambil pelajaran dari setiap kisah yang dipelajari.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan pemahaman yang baik terhadap kisah teladan.',e:'menceritakan kembali kisah, memahami pesan moral, menunjukkan ketertarikan terhadap tokoh teladan',h:'Semoga Allah menjadikan kisah-kisah teladan sebagai inspirasi dalam bertumbuh menjadi pribadi yang baik.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemampuan yang sangat baik dalam memahami kisah teladan.',e:'mampu menghubungkan kisah dengan kehidupan sehari-hari, menunjukkan refleksi yang baik, aktif menyampaikan pendapat',h:'Semoga Allah menjadikan setiap kisah yang dipelajari sebagai jalan pembentukan akhlak yang mulia.'},
+  },
+  'MATERI TEMA':{
+    MB:{a:'Alhamdulillah Ananda mulai mengenal tema pembelajaran yang dipelajari selama semester ini.',e:'mengikuti kegiatan eksplorasi, mengenali objek yang dipelajari, menunjukkan rasa ingin tahu',h:'Semoga Allah menjaga semangat belajar dan rasa ingin tahu Ananda.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan pemahaman yang baik terhadap tema pembelajaran.',e:'aktif dalam kegiatan tema, mampu menjawab pertanyaan sederhana, menunjukkan antusiasme belajar',h:'Semoga Allah menjadikan setiap ilmu yang dipelajari sebagai jalan menuju kebaikan.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan pemahaman yang sangat baik terhadap tema pembelajaran.',e:'aktif mengeksplorasi materi, menunjukkan rasa ingin tahu yang tinggi, mampu mengaitkan pembelajaran dengan pengalaman sehari-hari',h:'Semoga Allah menjaga semangat belajar Ananda dan menjadikannya pribadi yang berilmu serta bermanfaat.'},
+  },
+  'KEMAMPUAN BAHASA':{
+    MB:{a:'Alhamdulillah Ananda mulai menunjukkan perkembangan dalam kemampuan berbahasa.',e:'mampu mengungkapkan kebutuhan sederhana, mulai bercerita dengan kalimat pendek, aktif mengikuti kegiatan berbahasa',h:'Semoga Allah menumbuhkan kemampuan berkomunikasi Ananda agar semakin lancar.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan kemampuan bahasa yang baik.',e:'mampu bercerita dengan kalimat yang cukup runtut, memahami pertanyaan dan menjawab dengan tepat, menunjukkan keberanian berkomunikasi',h:'Semoga Allah menambah kecerdasan berbahasa Ananda dan menjadikannya lisan yang selalu berkata baik.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemampuan bahasa yang sangat baik dan menggembirakan.',e:'mampu bercerita dengan kalimat lengkap dan runtut, kosakata kaya, aktif bertanya dan menjawab dalam berbagai kegiatan',h:'Semoga Allah menambah kecerdasan Ananda dan menjadikan lisannya sebagai lisan yang selalu berkata baik dan bermanfaat.'},
+  },
+  'KOGNITIF':{
+    MB:{a:'Alhamdulillah Ananda mulai menunjukkan rasa ingin tahu dan kemampuan berpikir yang berkembang.',e:'mengikuti kegiatan berpikir sederhana, mulai memahami konsep dasar, menunjukkan rasa ingin tahu yang tumbuh',h:'Semoga Allah memberkahi akal dan pikiran Ananda agar terus berkembang.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan kognitif yang baik dalam berbagai kegiatan.',e:'mampu memahami konsep dasar, menyelesaikan tugas dengan cukup mandiri, menunjukkan kemampuan berpikir yang terus berkembang',h:'Semoga Allah memberkahi kecerdasan Ananda dan menjadikannya anak yang bijak menggunakan akalnya.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kemampuan kognitif yang sangat baik dan membanggakan.',e:'mampu menyelesaikan tantangan secara mandiri, mengenal konsep dengan baik, menunjukkan kemampuan berpikir yang logis dan kreatif',h:'Semoga Allah memberkahi akal dan pikiran Ananda menjadikannya anak yang cerdas dan bijak.'},
+  },
+  'MOTORIK':{
+    MB:{a:'Alhamdulillah Ananda mulai menunjukkan perkembangan motorik dalam kegiatan sehari-hari.',e:'mengikuti kegiatan fisik dengan antusias, mulai menunjukkan koordinasi yang berkembang, aktif dalam kegiatan gerak dan bermain',h:'Semoga Allah menjaga kesehatan Ananda dan menumbuhkan fisik yang kuat serta aktif dalam kebaikan.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan perkembangan motorik yang baik dalam berbagai aktivitas.',e:'koordinasi gerak cukup baik, mampu mengikuti aktivitas fisik dengan baik, perkembangan motorik halus menunjukkan kemajuan yang menggembirakan',h:'Semoga Allah menjaga kesehatan dan kekuatan fisik Ananda untuk mendukung setiap aktivitas belajarnya.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan perkembangan motorik yang sangat baik dan mengesankan.',e:'koordinasi motorik kasar dan halus berkembang dengan baik, aktif dan lincah dalam kegiatan fisik, mampu menyelesaikan tugas motorik halus dengan rapi',h:'Semoga Allah menjaga kesehatan Ananda agar tumbuh menjadi anak yang sehat, kuat, dan aktif dalam kebaikan.'},
+  },
+  'KREATIFITAS':{
+    MB:{a:'Alhamdulillah Ananda mulai menunjukkan ekspresi kreatif dalam kegiatan seni dan eksplorasi.',e:'mulai berani berekspresi dalam kegiatan seni, mengikuti kegiatan kreasi dengan antusias, menunjukkan minat terhadap berbagai media kreasi',h:'Semoga Allah menumbuhkan potensi kreatif Ananda dan menjadikannya sarana mengungkapkan keindahan dalam bingkai Islam.'},
+    BCB:{a:'Alhamdulillah Ananda menunjukkan kreatifitas yang baik dalam berbagai kegiatan seni.',e:'aktif mengikuti kegiatan kreasi, berani mengekspresikan ide dengan percaya diri, menghasilkan karya yang cukup orisinal',h:'Semoga Allah mengembangkan potensi kreatif Ananda dan menjadikannya sarana berbuat kebaikan yang indah.'},
+    BSB:{a:'MasyaAllah Ananda menunjukkan kreatifitas yang sangat baik dan menakjubkan.',e:'aktif dalam kegiatan seni, menghasilkan karya yang orisinal dan penuh warna, berani berekspresi dengan percaya diri',h:'Semoga Allah menumbuhkan potensi kreatif Ananda dan menjadikannya sarana mengungkapkan keindahan dalam bingkai Islam.'},
+  },
+};
+
+// ══════════════════════════════════════════
+// LOAD CONTOH DATA
 // ══════════════════════════════════════════
 function loadContoh(){
-  document.getElementById('f-nama').value='Faiza Az Zahra';
-  document.getElementById('f-nisn').value='2024.TK-BIN.011';
-  document.getElementById('f-nipd').value='0092837482';
-  document.getElementById('f-kelas').value='K2';
-  document.getElementById('f-semester').value='2 (Genap)';
-  document.getElementById('f-tahun').value='2024/2025';
-  document.getElementById('f-cabang').value='Bintaro';
-  document.getElementById('f-tanggal').value='2025-06-20';
-  document.getElementById('f-walikelas').value='U. Purwati';
-  document.getElementById('f-nip').value='198904122013112002';
-  onCabangChange('Bintaro');
-  onKelasChange('K2');
+  const nama = document.getElementById('f-nama').value.trim();
+  const nisn = document.getElementById('f-nisn').value.trim();
+  if(!nama || !nisn){
+    alert('Isi Nama Santri dan NISN/Nomor Induk terlebih dahulu sebelum memuat contoh.');
+    return;
+  }
+  const namaPertama = nama.split(' ')[0];
+
+  // Fill assessment per poin sesuai kelas aktif
+  state.assessment.forEach(p => {
+    const level = CONTOH_LEVELS[p.nama] || 'BCB';
+    const domainKey = POIN_DOMAIN_MAP_FE[p.nama];
+    const ctx = domainKey && NC[domainKey] && NC[domainKey][level];
+    p.level = level;
+    if(ctx){
+      p.evidence = ctx.e;
+      const a = ctx.a.replace(/Ananda/g, 'Ananda ' + namaPertama);
+      const h = ctx.h.replace(/Ananda/g, 'Ananda ' + namaPertama);
+      p.narasi = a + ' ' + ctx.e + '. ' + h;
+    }
+  });
+
+  // Presensi
   document.getElementById('abs-sakit').value='0';
-  document.getElementById('abs-izin').value='4';
+  document.getElementById('abs-izin').value='1';
   document.getElementById('abs-alpa').value='0';
-  setKesimpulan('BSB');
-  document.getElementById('f-catatan').value='Alhamdulillah Ananda Rara pada semester dua secara umum berkembang dengan sangat baik, yaitu pada aspek kepribadian islami, tsaqofah islam, materi Tarbiyah dan umum serta pengembangan kemampuan dasar. Harapan kami kedepannya Ananda lebih istiqomah lagi dalam memurojaah, seperti hafalan hadits, doa, Asmaul Husna, serta materi-materi lain yang sudah dipelajari supaya lebih lancar lagi. Selamat ya, Ananda Rara naik ke TK A. Allahumma barik anak shalihah.';
 
-  const narasi = {
-    'Akhlak Kepada Guru':        {level:'BSB', evidence:'selalu memberi salam, bertutur sopan, merespons arahan tanpa diingatkan', narasi:'MasyaAllah Ananda Rara menunjukkan akhlak yang sangat baik kepada Musyrifah. Ananda selalu mengucapkan salam dengan tulus saat bertemu, bertutur kata sopan dan lembut, serta merespons setiap arahan Musyrifah dengan penuh hormat tanpa perlu diingatkan terlebih dahulu. Konsistensi ini menunjukkan karakter Qur\'ani yang tumbuh dengan indah dalam diri Ananda. Semoga Allah senantiasa menjaga akhlak mulia Ananda dan menjadikannya teladan yang baik bagi teman-temannya.'},
-    'Akhlak Kepada Teman':       {level:'BSB', evidence:'ramah, aktif membantu teman, mampu jadi penengah saat ada perselisihan', narasi:'MasyaAllah Ananda Rara menunjukkan akhlak yang sangat baik kepada teman-temannya. Ananda aktif membantu teman yang membutuhkan, selalu bersikap ramah dan hangat, serta mampu menjadi penengah yang bijak saat ada perbedaan kecil antar teman. Sikap sayang dan empati Ananda menjadi bukti nyata tumbuhnya karakter yang indah. Semoga Allah menjaga akhlak mulia Ananda dan menjadikannya sahabat yang selalu membawa kebaikan.'},
-    'Kemandirian':               {level:'BSB', evidence:'memakai sepatu sendiri, meletakkan tas di rak, makan dan membereskan peralatan sendiri', narasi:'MasyaAllah Ananda Rara menunjukkan kemandirian yang sangat baik dalam kegiatan sehari-hari. Ananda mampu memakai dan melepas sepatu sendiri, meletakkan tas di rak yang benar, makan dengan rapi, serta membereskan peralatan makan setelah selesai tanpa perlu diarahkan. Kemandiriannya merupakan bekal luar biasa yang mendukung tumbuh kembangnya. Semoga Allah menjaga karakter kuat ini dan menjadikannya bekal meraih cita-cita yang mulia.'},
-    'Kedisiplinan':              {level:'BCB', evidence:'tertib berseragam, rapi berbaris, buang sampah pada tempatnya', narasi:'Alhamdulillah Ananda Rara menunjukkan kedisiplinan yang baik dalam keseharian di sekolah. Ananda tertib dalam berseragam, mengikuti berbaris dengan baik, dan membuang sampah pada tempatnya. Kedisiplinan ini sudah menjadi kebiasaan yang baik dan perlu terus dijaga agar semakin konsisten tanpa perlu diingatkan. Semoga Allah memperkuat karakter disiplin Ananda dan menjadikannya pribadi yang amanah dalam setiap tanggung jawab.'},
-    'Karakter Kekhalifahan':     {level:'BSB', evidence:'berani memimpin berbaris, percaya diri tampil di depan, mengajak teman berbuat baik', narasi:'MasyaAllah Ananda Rara menunjukkan karakter kekhalifahan yang sangat baik. Ananda berani tampil memimpin berbaris di depan teman-teman, percaya diri maju ke depan kelas, dan aktif mengajak teman untuk berbuat baik. Jiwa kepemimpinan Ananda tumbuh dengan indah sesuai harapan. Semoga Allah menjadikan Ananda pemimpin yang amanah, adil, dan dicintai sebagaimana para nabi dan sahabat yang mulia.'},
-    'Sosial Emosional':          {level:'BSB', evidence:'mampu mengungkapkan emosi senang-sedih-antusias, bersosialisasi harmonis, empati tinggi', narasi:'MasyaAllah Ananda Rara menunjukkan kematangan sosial emosional yang sangat baik. Ananda mampu mengungkapkan emosi dengan tepat sesuai situasi seperti rasa senang, sedih, dan antusias, bersosialisasi dengan harmonis bersama teman, serta menunjukkan kepedulian dan empati yang tinggi. Kecerdasan emosional ini menjadi kekuatan yang berharga bagi Ananda. Semoga Allah menjaga kelembutan hati Ananda dan terus menumbuhkan kecerdasan emosionalnya.'},
-    "Tahfidz Qur'an":            {level:'BSB', evidence:'hafal Qs Al-Falaq sampai Al-Ikhlas sangat lancar, sedang proses Qs Al-Lahab', narasi:"MasyaAllah Ananda Rara menunjukkan kemampuan hafalan Al-Qur'an yang sangat baik. Hafalan surat mulai dari Qs. Al-Falaq hingga Qs. Al-Ikhlas sangat lancar dan kuat, dan Ananda sedang dalam proses menghafal Qs. Al-Lahab dengan penuh semangat. Kecintaan Ananda terhadap Al-Qur'an sangat membanggakan dan menjadi bukti nyata kepeduliannya. Semoga Allah menjadikan Ananda ahlul Qur'an yang mengamalkan dan menjaga kalam-Nya sepanjang hayat."},
-    "Tahsin Karimah & Al-Qur'an":{level:'BSB', evidence:'karimah Bab 1 halaman 4-16 sangat lancar, sedang proses halaman 17', narasi:"MasyaAllah Ananda Rara menunjukkan kemampuan membaca Al-Qur'an yang sangat baik. Ananda telah menyelesaikan karimah Bab 1 halaman 4-16 dengan sangat lancar dan sedang dalam proses membaca halaman 17 dengan penuh semangat. Kemajuan Ananda mencerminkan ketekunan dan kecintaan terhadap ilmu Al-Qur'an. Semoga Allah menjadikan bacaan Al-Qur'an Ananda semakin indah dan penuh keberkahan di setiap hurufnya."},
-    'Hadits':                    {level:'BCB', evidence:'hafal hadits tersenyum HR At-Tirmidzi dengan cukup lancar, sedikit bimbingan', narasi:"Alhamdulillah Ananda Rara menunjukkan perkembangan yang baik dalam hafalan hadits. Ananda mampu menghafal hadits tentang senyum (HR. At-Tirmidzi) dengan cukup lancar dan sedikit bimbingan. Kemampuan ini menunjukkan usaha Ananda dalam mencintai sunnah Rasulullah ﷺ. Semoga Allah memperkuat hafalan Ananda dan menjadikan hadits-hadits Rasulullah ﷺ sebagai pedoman yang hidup dalam kesehariannya."},
-    'Doa':                       {level:'BCB', evidence:'hafal doa belajar, ikrar syahadat, doa berbuka puasa, doa sebelum tidur', narasi:'Alhamdulillah Ananda Rara menunjukkan perkembangan yang baik dalam hafalan doa harian. Ananda mampu menghafal doa belajar, ikrar syahadat, doa berbuka puasa, dan doa sebelum tidur dengan cukup lancar. Kebiasaan berdoa ini menunjukkan tumbuhnya kesadaran spiritual yang baik dalam diri Ananda. Semoga Allah menjaga kebiasaan indah ini dan menjadikan doa sebagai kebutuhan yang tidak terpisahkan dari kehidupan Ananda.'},
-    'Asmaul Husna':              {level:'BSB', evidence:'hafal Ar-Rahman sampai As-Sami beserta gerakan dengan sangat lancar', narasi:"MasyaAllah Ananda Rara menunjukkan hafalan Asmaul Husna yang sangat baik. Ananda hafal dari Ar-Rahman hingga As-Sami beserta gerakannya dengan sangat lancar dan penuh semangat. Antusiasme Ananda saat kegiatan Asmaul Husna sangat terlihat dan menjadi inspirasi bagi teman-temannya. Semoga Allah menjaga hati Ananda agar senantiasa mengenal, mencintai, dan bertumbuh dalam keimanan kepada-Nya."},
-    'Syair Islami':              {level:'BSB', evidence:'hafal syair bagian tumbuhan, adab berbicara, tepuk wudhu, syair bulan Hijriyah dengan lancar dan ekspresif', narasi:"MasyaAllah Ananda Rara menunjukkan kemampuan syair Islami yang sangat baik dan membanggakan. Ananda hafal berbagai syair seperti syair bagian tumbuhan, adab berbicara, tepuk wudhu, dan syair nama-nama bulan Hijriyah dengan sangat lancar dan ekspresif. Semangat Ananda saat tampil menjadi inspirasi bagi teman-temannya. Semoga Allah menjaga semangat Ananda dan menjadikan syair-syair indah ini sebagai bekal mendekatkan diri kepada-Nya."},
-    'Tauhid : Mengenal Allah':   {level:'BSB', evidence:'mengenal ragam tumbuhan ciptaan Allah, hafal nama bulan Hijriyah, aktif mengaitkan dengan kebesaran Allah', narasi:"MasyaAllah Ananda Rara menunjukkan pemahaman yang sangat baik tentang mengenal Allah. Ananda mampu mengaitkan keindahan ragam tumbuhan dengan rasa syukur atas ciptaan Allah, aktif menghafal nama-nama bulan Hijriyah melalui syair, dan antusias berdiskusi tentang kebesaran Allah. Rasa kagum dan cinta Ananda kepada Allah sangat terlihat. Semoga Allah menjaga hati Ananda agar senantiasa mengenal, mencintai, dan bergantung hanya kepada-Nya."},
-    'Materi Fiqih':              {level:'BSB', evidence:'hafal nama dan waktu sholat wajib, praktek tata cara wudhu, mengenal ibadah haji', narasi:"MasyaAllah Ananda Rara menunjukkan pemahaman yang sangat baik dalam materi fiqih. Ananda hafal nama-nama dan waktu sholat wajib, mampu mempraktikkan tata cara wudhu dengan urutan yang benar, serta memahami pengenalan ibadah haji dengan baik. Kemampuan Ananda mempraktikkan materi secara mandiri sangat membanggakan. Semoga Allah menjadikan ilmu fiqih yang dipelajari sebagai amal yang bermanfaat dan menjadi cahaya dalam kehidupan Ananda."},
-    'Adab dan Akhlaq':           {level:'BSB', evidence:'mempelajari dan mempraktikkan adab puasa dan adab tidur secara konsisten', narasi:"MasyaAllah Ananda Rara menunjukkan penerapan adab dan akhlaq yang sangat baik dalam keseharian. Ananda sudah mempelajari dan mempraktikkan adab-adab seperti adab puasa dan adab tidur dengan baik dan konsisten. Kemampuan Ananda menerapkan adab dalam kehidupan nyata adalah bukti nyata tumbuhnya akhlak Qur'ani. Semoga Allah menjaga dan memperkuat akhlak mulia Ananda sehingga menjadi kebiasaan yang langgeng sepanjang hidupnya."},
-    'Materi Tema':               {level:'BSB', evidence:'mengenal bagian tumbuhan, binatang ternak, kendaraan darat, mampu menjawab setiap pertanyaan', narasi:'MasyaAllah Ananda Rara menunjukkan pemahaman yang sangat baik terhadap materi tema semester ini. Ananda mampu mengenal dan menyebutkan bagian-bagian tumbuhan, ragam binatang ternak beserta manfaatnya, serta macam-macam kendaraan darat dengan lancar. Setiap pertanyaan Musyrifah dijawab dengan tepat dan antusias, mencerminkan rasa ingin tahu yang tinggi. Semoga Allah menjaga semangat belajar Ananda dan menjadikannya pribadi yang berilmu serta bermanfaat.'},
-    'Kemampuan Bahasa':          {level:'BSB', evidence:'mampu mengungkapkan keinginan, berkomunikasi baik, menceritakan kembali tayangan edukasi', narasi:"MasyaAllah Ananda Rara menunjukkan kemampuan bahasa yang sangat baik dan menggembirakan. Ananda mampu mengungkapkan keinginannya dengan jelas, berkomunikasi dengan bahasa yang baik dan sopan, serta mampu menceritakan kembali tayangan edukatif yang disimaknya dengan runtut. Perkembangan bahasa yang pesat ini menjadi pondasi komunikasi yang kuat. Semoga Allah menambah kecerdasan Ananda dan menjadikan lisannya sebagai lisan yang selalu berkata baik dan bermanfaat."},
-    'Kognitif':                  {level:'BSB', evidence:'mengenal angka 1-15, huruf konsonan B-G dan huruf vokal, mampu berhitung mandiri', narasi:"MasyaAllah Ananda Rara menunjukkan kemampuan kognitif yang sangat baik dan membanggakan. Ananda mampu mengenal dan menyebutkan angka 1-15 dengan sangat baik, serta telah mengenal huruf konsonan B-G dan huruf vokal dengan lancar. Kecerdasan berpikir Ananda terus berkembang dengan luar biasa dan menjadi modal berharga bagi proses belajarnya. Semoga Allah memberkahi akal dan pikiran Ananda, menjadikannya anak yang cerdas dan bijak menggunakan ilmunya untuk kebaikan."},
-    'Motorik':                   {level:'BSB', evidence:'mewarnai, meronce, kolase rapi (motorik halus); gerakan Asmaul Husna, panahan (motorik kasar)', narasi:"MasyaAllah Ananda Rara menunjukkan perkembangan motorik yang sangat baik dan mengesankan. Dalam motorik kasar, Ananda terampil dalam gerakan Asmaul Husna dan aktif saat fun game seperti panahan. Dalam motorik halus, Ananda mampu mewarnai, meronce, dan membuat kolase dengan sangat rapi dan teliti. Perkembangan fisik yang seimbang ini sangat mendukung kesiapan Ananda. Semoga Allah menjaga kesehatan Ananda agar tumbuh menjadi anak yang sehat, kuat, dan aktif."},
-    'Kreatifitas':               {level:'BSB', evidence:'membuat vegetable garden, domba, hiasan bulan Hijriyah, kartu ucapan Ramadhan penuh warna', narasi:"MasyaAllah Ananda Rara menunjukkan kreatifitas yang sangat baik dan menakjubkan. Ananda selalu antusias dalam kegiatan berkreasi seperti membuat vegetable garden, domba lucu, hiasan nama-nama bulan Hijriyah, hingga kartu ucapan menyambut Ramadhan yang penuh warna dan orisinal. Daya imajinasi dan kreativitas Ananda menjadi kekuatan tersendiri yang berharga. Semoga Allah menumbuhkan potensi kreatif Ananda dan menjadikannya sarana mengungkapkan keindahan dalam bingkai Islam."},
-  };
+  // Kesimpulan & catatan
+  setKesimpulan('BCB');
+  document.getElementById('f-catatan').value='Alhamdulillah Ananda ' + namaPertama + ' menunjukkan perkembangan yang baik selama semester ini. Semoga Allah senantiasa menjaga, memberkahi, dan menumbuhkan potensi terbaik dalam diri Ananda.';
 
-  state.assessment.forEach(p=>{ const n=narasi[p.nama]; if(n){ p.level=n.level; p.evidence=n.evidence; p.narasi=n.narasi; } });
   renderAssessment();
 }
 
@@ -1367,7 +1516,7 @@ function showScanPreview(result) {
 
   // Santri section
   html += `<div class="scan-section"><div class="scan-section-title">Data Santri</div>`;
-  const santriLabels = {nama:'Nama',nis:'NIS',nipd:'NIPD',kelas:'Kelas',semester:'Semester',tahunAjaran:'Tahun Ajaran',cabang:'Cabang'};
+  const santriLabels = {nama:'Nama',nis:'NIS',kelas:'Kelas',semester:'Semester',tahunAjaran:'Tahun Ajaran',cabang:'Cabang'};
   for (const [k, label] of Object.entries(santriLabels)) {
     const val = santri[k];
     html += `<div class="scan-row">
@@ -1427,7 +1576,7 @@ function showScanPreview(result) {
 function applyScannedData() {
   // Apply santri data
   const fieldMap = {
-    nama: 'f-nama', nis: 'f-nisn', nipd: 'f-nipd', tahunAjaran: 'f-tahun'
+    nama: 'f-nama', nis: 'f-nisn', tahunAjaran: 'f-tahun'
   };
   for (const [scanKey, formId] of Object.entries(fieldMap)) {
     const val = document.getElementById('sp-' + scanKey)?.value?.trim();
