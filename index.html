@@ -228,6 +228,58 @@ textarea{resize:vertical}
   .btn-dl-mobile{display:inline-flex!important}
   .btn-dl-desktop{display:none!important}
 }
+
+/* ── SCAN FEATURE ── */
+.scan-bar{background:linear-gradient(135deg,#f0fdf4,#f7fef0);border:1.5px dashed #86efac;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.scan-bar-icon{font-size:28px;flex-shrink:0}
+.scan-bar-text{flex:1}
+.scan-bar-title{font-weight:700;font-size:14px;color:#166534;margin-bottom:2px}
+.scan-bar-sub{font-size:12px;color:#4ade80;color:#15803d}
+.btn-scan{background:#16a34a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0}
+.btn-scan:hover{background:#15803d}
+
+/* Scan method modal */
+.scan-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
+.scan-modal-overlay.active{display:flex}
+.scan-modal-box{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.scan-modal-title{font-weight:700;font-size:16px;color:#1a1a2e;margin-bottom:4px}
+.scan-modal-sub{font-size:12px;color:#888;margin-bottom:20px}
+.scan-methods{display:flex;gap:10px}
+.scan-method-btn{flex:1;border:2px solid #e0e0ee;border-radius:12px;padding:16px 8px;text-align:center;cursor:pointer;background:#f8f9ff;transition:all .15s}
+.scan-method-btn:hover{border-color:#6366f1;background:#eef2ff}
+.scan-method-icon{font-size:28px;display:block;margin-bottom:6px}
+.scan-method-label{font-size:12px;font-weight:700;color:#3730a3}
+.scan-method-sub{font-size:10px;color:#888;margin-top:2px}
+.scan-loading{text-align:center;padding:20px 0;display:none}
+.scan-loading-spinner{font-size:32px;display:block;margin-bottom:8px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scan-loading-text{font-size:13px;color:#555}
+
+/* Scan preview modal */
+.scan-preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.scan-preview-overlay.active{display:flex}
+.scan-preview-box{background:#fff;border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35);margin:auto}
+.scan-preview-header{background:#1e293b;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.scan-preview-title{font-weight:700;font-size:14px}
+.scan-preview-body{padding:16px;max-height:70vh;overflow-y:auto}
+.scan-section{margin-bottom:14px}
+.scan-section-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f1f5f9;padding-bottom:4px;margin-bottom:8px}
+.scan-row{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:12px}
+.scan-row-key{width:130px;color:#64748b;flex-shrink:0;padding-top:2px}
+.scan-row-val{flex:1;font-weight:600;color:#1e293b}
+.scan-row-val.uncertain{color:#d97706}
+.scan-badge-warn{font-size:9px;background:#fef3c7;border:1px solid #fbbf24;border-radius:3px;padding:0 4px;color:#92400e;font-weight:700;margin-left:4px;vertical-align:middle}
+.scan-editable{width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;font-size:12px;color:#1e293b;margin-top:4px;font-family:inherit;resize:vertical}
+.scan-level-pill{display:inline-block;font-size:11px;font-weight:700;padding:1px 10px;border-radius:10px}
+.scan-level-pill.BSB{background:#dcfce7;color:#166534}
+.scan-level-pill.BCB{background:#fef3c7;color:#92400e}
+.scan-level-pill.MB{background:#fee2e2;color:#991b1b}
+.scan-level-pill.null{background:#f1f5f9;color:#94a3b8}
+.scan-info-box{background:#eff6ff;border-left:3px solid #3b82f6;border-radius:4px;padding:10px 12px;font-size:12px;color:#1e40af;margin-bottom:12px}
+.scan-preview-footer{background:#f8fafc;padding:12px 16px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #e2e8f0}
+.btn-apply-scan{background:#16a34a;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-apply-scan:hover{background:#15803d}
+.btn-cancel-scan{background:#f1f5f9;color:#475569;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer}
 </style>
 </head>
 <body>
@@ -249,6 +301,16 @@ textarea{resize:vertical}
 
 <!-- MAIN FORM -->
 <div class="page" id="main-page">
+
+  <!-- ── SCAN BAR ── -->
+  <div class="scan-bar">
+    <div class="scan-bar-icon">📷</div>
+    <div class="scan-bar-text">
+      <div class="scan-bar-title">Scan Lembar Penilaian</div>
+      <div class="scan-bar-sub">Foto lembar musyrifah → isi otomatis semua field</div>
+    </div>
+    <button class="btn-scan" onclick="openScanModal()">📷 Scan Lembar</button>
+  </div>
 
   <!-- ── DATA PROFIL ── -->
   <div class="card">
@@ -1088,6 +1150,326 @@ async function generateNarasi(idx) {
     btn.disabled = false;
     btn.textContent = '✨ Generate AI';
   }
+}
+</script>
+
+<!-- SCAN METHOD MODAL -->
+<div class="scan-modal-overlay" id="scan-modal">
+  <div class="scan-modal-box">
+    <div class="scan-modal-title">📷 Scan Lembar Penilaian</div>
+    <div class="scan-modal-sub">Pilih cara mengambil foto lembar penilaian musyrifah</div>
+    <div class="scan-methods" id="scan-methods-ui">
+      <div class="scan-method-btn" onclick="triggerScanInput('camera')">
+        <span class="scan-method-icon">📷</span>
+        <div class="scan-method-label">Kamera</div>
+        <div class="scan-method-sub">Foto langsung</div>
+      </div>
+      <div class="scan-method-btn" onclick="triggerScanInput('gallery')">
+        <span class="scan-method-icon">🖼️</span>
+        <div class="scan-method-label">Galeri</div>
+        <div class="scan-method-sub">Pilih dari HP</div>
+      </div>
+      <div class="scan-method-btn" onclick="triggerScanInput('file')">
+        <span class="scan-method-icon">📁</span>
+        <div class="scan-method-label">Upload</div>
+        <div class="scan-method-sub">PNG / JPG</div>
+      </div>
+    </div>
+    <div class="scan-loading" id="scan-loading">
+      <span class="scan-loading-spinner">⏳</span>
+      <div class="scan-loading-text">Membaca lembar penilaian…<br>Mohon tunggu sebentar</div>
+    </div>
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn-cancel-scan" onclick="closeScanModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="scan-input-camera" accept="image/*" capture="environment" style="display:none" onchange="handleScanFile(this)">
+<input type="file" id="scan-input-gallery" accept="image/*" style="display:none" onchange="handleScanFile(this)">
+
+<!-- SCAN PREVIEW MODAL -->
+<div class="scan-preview-overlay" id="scan-preview-modal">
+  <div class="scan-preview-box">
+    <div class="scan-preview-header">
+      <span class="scan-preview-title">📋 Hasil Scan — Review Sebelum Diterapkan</span>
+      <span style="font-size:11px;opacity:.7">✏️ Bisa diedit langsung</span>
+    </div>
+    <div class="scan-preview-body" id="scan-preview-body"></div>
+    <div class="scan-preview-footer">
+      <button class="btn-cancel-scan" onclick="closeScanPreview()">✕ Batal</button>
+      <button class="btn-apply-scan" onclick="applyScannedData()">✅ Terapkan ke Form</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// SCAN FEATURE
+// ══════════════════════════════════════════
+
+let _scanResult = null;
+
+// Mapping: JSON key → poin nama (partial match, lowercase)
+const SCAN_POIN_MAP = {
+  akhlakGuru:           'Akhlak Kepada Guru',
+  akhlakTeman:          'Akhlak Kepada Teman',
+  kemandirian:          'Kemandirian',
+  kedisiplinan:         'Kedisiplinan',
+  karakterKekhalifahan: 'Karakter Kekhalifahan',
+  sosialEmosional:      'Sosial Emosional',
+  tahfidzQuran:         "Tahfidz Qur'an",
+  tahsin:               'Tahsin',
+  hadits:               'Hadits',
+  doa:                  'Doa',
+  asmaulHusna:          'Asmaul Husna',
+  syairIslami:          'Syair Islami',
+  tauhid:               'Tauhid',
+  fiqih:                'Fiqih',
+  adabAkhlaq:           'Adab',
+  materiTema:           'Materi Tema',
+  bahasa:               'Kemampuan Bahasa',
+  kognitif:             'Kognitif',
+  motorik:              'Motorik',
+  kreatifitas:          'Kreatifitas',
+};
+
+function openScanModal() {
+  document.getElementById('scan-modal').classList.add('active');
+  document.getElementById('scan-methods-ui').style.display = 'flex';
+  document.getElementById('scan-loading').style.display = 'none';
+}
+
+function closeScanModal() {
+  document.getElementById('scan-modal').classList.remove('active');
+}
+
+function closeScanPreview() {
+  document.getElementById('scan-preview-modal').classList.remove('active');
+  _scanResult = null;
+}
+
+function triggerScanInput(mode) {
+  if (mode === 'camera') {
+    document.getElementById('scan-input-camera').click();
+  } else {
+    document.getElementById('scan-input-gallery').click();
+  }
+}
+
+function handleScanFile(inputEl) {
+  const file = inputEl.files[0];
+  if (!file) return;
+  inputEl.value = '';
+
+  // Show loading
+  document.getElementById('scan-methods-ui').style.display = 'none';
+  document.getElementById('scan-loading').style.display = 'block';
+
+  // Compress + convert to base64
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const base64 = await compressImage(e.target.result, 1200, 0.85);
+      // Remove data:image/...;base64, prefix
+      const b64data = base64.split(',')[1];
+
+      const resp = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: b64data })
+      });
+
+      const json = await resp.json();
+      if (!resp.ok || json.error) throw new Error(json.error || 'Gagal memproses');
+
+      closeScanModal();
+      showScanPreview(json.result);
+    } catch (err) {
+      closeScanModal();
+      alert('Gagal scan: ' + err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Compress image to max width, returns base64 data URL
+function compressImage(dataUrl, maxW, quality) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, maxW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width * ratio;
+      canvas.height = img.height * ratio;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
+function showScanPreview(result) {
+  _scanResult = result;
+
+  const penilaian = result.penilaian || {};
+  const santri = result.santri || {};
+  const presensi = result.presensi || {};
+
+  // Count found fields
+  const totalPoin = Object.keys(penilaian).length;
+  const foundPoin = Object.values(penilaian).filter(v => v !== null).length;
+  const foundSantri = Object.values(santri).filter(v => v && v !== '').length;
+
+  let html = `<div class="scan-info-box">
+    ✅ <b>${foundPoin} dari ${totalPoin} poin</b> berhasil terbaca.
+    ${foundPoin < totalPoin ? ' Field bertanda ⚠️ perlu dicek.' : ''}
+  </div>`;
+
+  // Santri section
+  html += `<div class="scan-section"><div class="scan-section-title">Data Santri</div>`;
+  const santriLabels = {nama:'Nama',nis:'NIS',nipd:'NIPD',kelas:'Kelas',semester:'Semester',tahunAjaran:'Tahun Ajaran',cabang:'Cabang'};
+  for (const [k, label] of Object.entries(santriLabels)) {
+    const val = santri[k];
+    html += `<div class="scan-row">
+      <span class="scan-row-key">${label}</span>
+      <span class="scan-row-val ${val ? '' : 'uncertain'}">
+        <input class="scan-editable" style="padding:3px 6px;height:26px" id="sp-${k}" value="${escHtml(val||'')}" placeholder="—">
+      </span>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // Penilaian section
+  html += `<div class="scan-section"><div class="scan-section-title">Penilaian per Poin</div>`;
+  for (const [key, label] of Object.entries(SCAN_POIN_MAP)) {
+    const val = penilaian[key];
+    const pillCls = val || 'null';
+    const warn = val === null ? `<span class="scan-badge-warn">⚠️</span>` : '';
+    html += `<div class="scan-row">
+      <span class="scan-row-key">${label}</span>
+      <span class="scan-row-val">
+        <select class="scan-editable" style="height:26px;padding:0 4px" id="sp-poin-${key}">
+          <option value=""${!val?' selected':''}>— tidak terbaca —</option>
+          <option value="MB"${val==='MB'?' selected':''}>MB</option>
+          <option value="BCB"${val==='BCB'?' selected':''}>BCB</option>
+          <option value="BSB"${val==='BSB'?' selected':''}>BSB</option>
+        </select>
+        ${warn}
+      </span>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // Presensi
+  html += `<div class="scan-section"><div class="scan-section-title">Presensi</div>`;
+  const presLabels = {sakit:'Sakit',izin:'Izin',tanpaKeterangan:'Tanpa Keterangan'};
+  for (const [k, label] of Object.entries(presLabels)) {
+    const val = presensi[k];
+    html += `<div class="scan-row">
+      <span class="scan-row-key">${label}</span>
+      <span class="scan-row-val">
+        <input class="scan-editable" type="number" style="height:26px;padding:3px 6px;width:80px" id="sp-pres-${k}" value="${val !== null && val !== undefined ? val : '0'}" min="0">
+      </span>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // Catatan
+  const catatan = result.catatanMusyrifah || '';
+  html += `<div class="scan-section"><div class="scan-section-title">Catatan Musyrifah</div>
+    <textarea class="scan-editable" id="sp-catatan" rows="3">${escHtml(catatan)}</textarea>
+  </div>`;
+
+  document.getElementById('scan-preview-body').innerHTML = html;
+  document.getElementById('scan-preview-modal').classList.add('active');
+}
+
+function applyScannedData() {
+  // Apply santri data
+  const fieldMap = {
+    nama: 'f-nama', nis: 'f-nisn', nipd: 'f-nipd', tahunAjaran: 'f-tahun'
+  };
+  for (const [scanKey, formId] of Object.entries(fieldMap)) {
+    const val = document.getElementById('sp-' + scanKey)?.value?.trim();
+    if (val) {
+      const el = document.getElementById(formId);
+      if (el) el.value = val;
+    }
+  }
+
+  // Kelas — try to match select option
+  const kelasVal = document.getElementById('sp-kelas')?.value?.trim();
+  if (kelasVal) {
+    const kelasEl = document.getElementById('f-kelas');
+    if (kelasEl) {
+      const opts = Array.from(kelasEl.options);
+      // Try exact match first, then partial
+      const match = opts.find(o => o.value === kelasVal) ||
+                    opts.find(o => o.value.toLowerCase().includes(kelasVal.toLowerCase()) ||
+                                   kelasVal.toLowerCase().includes(o.value.toLowerCase().split('-')[0]));
+      if (match) {
+        kelasEl.value = match.value;
+        onKelasChange(match.value);
+      }
+    }
+  }
+
+  // Semester
+  const semVal = document.getElementById('sp-semester')?.value?.trim();
+  if (semVal) {
+    const semEl = document.getElementById('f-semester');
+    if (semEl) {
+      const opts = Array.from(semEl.options);
+      const match = opts.find(o => o.value.startsWith(semVal[0]));
+      if (match) semEl.value = match.value;
+    }
+  }
+
+  // Cabang
+  const cabangVal = document.getElementById('sp-cabang')?.value?.trim();
+  if (cabangVal) {
+    const cabEl = document.getElementById('f-cabang');
+    if (cabEl) {
+      const opts = Array.from(cabEl.options);
+      const match = opts.find(o => o.value.toLowerCase() === cabangVal.toLowerCase());
+      if (match) { cabEl.value = match.value; onCabangChange(match.value); }
+    }
+  }
+
+  // Penilaian — match by poin nama (partial)
+  for (const [scanKey, poinNama] of Object.entries(SCAN_POIN_MAP)) {
+    const level = document.getElementById('sp-poin-' + scanKey)?.value;
+    if (!level) continue;
+    const poin = state.assessment.find(a =>
+      a.nama.toLowerCase().includes(poinNama.toLowerCase()) ||
+      poinNama.toLowerCase().includes(a.nama.toLowerCase().split(':')[0].trim())
+    );
+    if (poin) poin.level = level;
+  }
+
+  // Presensi
+  const sakit = document.getElementById('sp-pres-sakit')?.value;
+  const izin = document.getElementById('sp-pres-izin')?.value;
+  const alpa = document.getElementById('sp-pres-tanpaKeterangan')?.value;
+  if (sakit !== undefined) document.getElementById('abs-sakit').value = sakit || 0;
+  if (izin !== undefined) document.getElementById('abs-izin').value = izin || 0;
+  if (alpa !== undefined) document.getElementById('abs-alpa').value = alpa || 0;
+
+  // Catatan
+  const catatan = document.getElementById('sp-catatan')?.value?.trim();
+  if (catatan) document.getElementById('f-catatan').value = catatan;
+
+  // Re-render assessment
+  renderAssessment();
+
+  closeScanPreview();
+  alert('✅ Data berhasil diterapkan ke form!');
+}
+
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
