@@ -342,14 +342,12 @@ textarea{resize:vertical}
         </div>
 
         <div class="fg">
-          <label class="lbl">Kelas Rombel</label>
+          <label class="lbl">Kelas</label>
           <select id="f-kelas" onchange="onKelasChange(this.value)">
-            <option value="KB-A">KB-A</option>
-            <option value="KB-B">KB-B</option>
-            <option value="TK A-A" selected>TK A-A</option>
-            <option value="TK A-B">TK A-B</option>
-            <option value="TK B-1">TK B-1</option>
-            <option value="TK B-2">TK B-2</option>
+            <option value="TODDLER">TODDLER</option>
+            <option value="PRE K">PRE K</option>
+            <option value="K1" selected>K1</option>
+            <option value="K2">K2</option>
           </select>
         </div>
         <div class="fg">
@@ -557,7 +555,7 @@ let state = { assessment:[], kesimpulan:'', santriList:[] };
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('f-tanggal').value = new Date().toISOString().split('T')[0];
   onCabangChange('BSD');
-  onKelasChange('TK A-A');
+  onKelasChange('K1');
   loadSantriFromSheets();
 });
 
@@ -570,9 +568,9 @@ function onCabangChange(val){
 }
 
 function getKurKey(kelas){
-  if(kelas.startsWith('KB')) return 'KB';
-  if(kelas.startsWith('TK A')) return 'TKA';
-  return 'TKB';
+  if(kelas==='TODDLER'||kelas==='PRE K') return 'KB';
+  if(kelas==='K1') return 'TKA';
+  return 'TKB'; // K2
 }
 
 function onKelasChange(kelas){
@@ -786,9 +784,9 @@ function fmtDate(s){
 }
 
 function levelLabel(kelas){
-  if(kelas.startsWith('KB')) return 'KB';
-  if(kelas.startsWith('TK A')) return 'TK A';
-  return 'TK B';
+  if(kelas==='TODDLER'||kelas==='PRE K') return 'KB';
+  if(kelas==='K1') return 'TK A';
+  return 'TK B'; // K2
 }
 
 function semPeriod(sem){
@@ -954,6 +952,43 @@ function onOverlayClick(e){
 // ══════════════════════════════════════════
 // PDF DOWNLOAD
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// SAVE TO DATABASE (Google Sheets via Apps Script)
+// ══════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMcgw7JjhLP_NEatel0--O90ccnkiqrBK3fRrSBHSxNB1R6NzPGAnkZlSjitXyN0xX/exec';
+
+function saveToDatabase(){
+  if(!APPS_SCRIPT_URL) return; // Skip kalau URL belum diisi
+  const data = getForm();
+  const payload = {
+    timestamp: new Date().toLocaleString('id-ID'),
+    nama:        data.nama,
+    nik:         data.nisn,
+    nipd:        data.nipd,
+    kelas:       data.kelas,
+    semester:    data.semester,
+    tahunAjaran: data.tahun,
+    cabang:      data.cabang,
+    musyrifah:   data.walikelas,
+    assessment:  state.assessment.map(p => ({
+      secId:   p.secId,
+      nama:    p.nama,
+      level:   p.level || '',
+      narasi:  p.narasi || ''
+    })),
+    sakit:       data.sakit,
+    izin:        data.izin,
+    alpa:        data.alpa,
+    kesimpulan:  state.kesimpulan || '',
+    catatan:     data.catatan || ''
+  };
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).catch(()=>{}); // Silent fail — PDF tetap jalan
+}
+
 function downloadPDF(){
   const data = getForm();
   const allChildren = Array.from(document.body.children);
@@ -981,7 +1016,7 @@ function downloadPDF(){
       jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
       pagebreak: { mode: ['css', 'legacy'], before: '.pt-sec-break' }
     }).from(wrapper).save()
-      .then(restore)
+      .then(() => { restore(); saveToDatabase(); })
       .catch(e => { restore(); alert('Gagal buat PDF: ' + e.message); });
   }, 400);
 }
@@ -1039,6 +1074,7 @@ function downloadPDFMobile(){
   if(!pw){ alert('Izinkan pop-up untuk membuka halaman cetak.'); return; }
   pw.document.write(fullHTML);
   pw.document.close();
+  saveToDatabase();
 }
 
 // ══════════════════════════════════════════
@@ -1069,7 +1105,7 @@ function loadContoh(){
   document.getElementById('f-nama').value='Faiza Az Zahra';
   document.getElementById('f-nisn').value='2024.TK-BIN.011';
   document.getElementById('f-nipd').value='0092837482';
-  document.getElementById('f-kelas').value='KB-A';
+  document.getElementById('f-kelas').value='K2';
   document.getElementById('f-semester').value='2 (Genap)';
   document.getElementById('f-tahun').value='2024/2025';
   document.getElementById('f-cabang').value='Bintaro';
@@ -1077,7 +1113,7 @@ function loadContoh(){
   document.getElementById('f-walikelas').value='U. Purwati';
   document.getElementById('f-nip').value='198904122013112002';
   onCabangChange('Bintaro');
-  onKelasChange('KB-A');
+  onKelasChange('K2');
   document.getElementById('abs-sakit').value='0';
   document.getElementById('abs-izin').value='4';
   document.getElementById('abs-alpa').value='0';
