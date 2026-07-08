@@ -957,13 +957,12 @@ function onOverlayClick(e){
 // ══════════════════════════════════════════
 // SAVE TO DATABASE (Google Sheets via Apps Script)
 // ══════════════════════════════════════════
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMcgw7JjhLP_NEatel0--O90ccnkiqrBK3fRrSBHSxNB1R6NzPGAnkZlSjitXyN0xX/exec';
+// Apps Script URL dipindah ke Vercel env var APPS_SCRIPT_URL (lebih aman, hindari CORS)
 
 function saveToDatabase(){
-  if(!APPS_SCRIPT_URL) return; // Skip kalau URL belum diisi
   const data = getForm();
   const payload = {
-    timestamp: new Date().toLocaleString('id-ID'),
+    timestamp:   new Date().toLocaleString('id-ID'),
     nama:        data.nama,
     nik:         data.nisn,
     nipd:        data.nipd,
@@ -973,21 +972,21 @@ function saveToDatabase(){
     cabang:      data.cabang,
     musyrifah:   data.walikelas,
     assessment:  state.assessment.map(p => ({
-      secId:   p.secId,
-      nama:    p.nama,
-      level:   p.level || '',
-      narasi:  p.narasi || ''
+      secId:  p.secId,
+      nama:   p.nama,
+      level:  p.level || '',
+      narasi: p.narasi || ''
     })),
-    sakit:       data.sakit,
-    izin:        data.izin,
-    alpa:        data.alpa,
-    kesimpulan:  state.kesimpulan || '',
-    catatan:     data.catatan || ''
+    sakit:      data.sakit,
+    izin:       data.izin,
+    alpa:       data.alpa,
+    kesimpulan: state.kesimpulan || '',
+    catatan:    data.catatan || ''
   };
-  fetch(APPS_SCRIPT_URL, {
+  // Lewat /api/save (Vercel proxy) untuk hindari CORS
+  fetch('/api/save', {
     method: 'POST',
-    mode: 'no-cors', // Apps Script melakukan redirect, perlu no-cors
-    headers: { 'Content-Type': 'text/plain' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   }).catch(()=>{}); // Silent fail — PDF tetap jalan
 }
