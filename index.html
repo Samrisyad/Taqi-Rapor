@@ -729,7 +729,8 @@ function closeAC(){ document.getElementById('ac-list').classList.remove('show');
 // ══════════════════════════════════════════
 async function loadSantriFromSheets(){
   const statusEl = document.getElementById('sheets-status');
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+  // gid=544298237 → tab data santri
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=544298237`;
   try{
     const res = await fetch(url);
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -737,16 +738,17 @@ async function loadSantriFromSheets(){
     const rows = csv.trim().split('\n').slice(1);
     state.santriList = rows.map(r=>{
       // Handle quoted CSV fields
-      const cols = r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)||[];
+      const cols = r.match(/(".*?"|[^",\r\n]+)(?=\s*,|\s*$)/g)||[];
+      const c = i => (cols[i]||'').replace(/^"|"$/g,'').trim();
+      // Sheet columns: NO. | KELAS | NIK | NAMA SANTRI | NAMA PANGGILAN | Musyrifah | ...
       return {
-        id:    (cols[0]||'').replace(/"/g,'').trim(),
-        nama:  (cols[1]||'').replace(/"/g,'').trim(),
-        nisn:  (cols[2]||'').replace(/"/g,'').trim(),
-        nipd:  (cols[3]||'').replace(/"/g,'').trim(),
-        kelas: (cols[4]||'').replace(/"/g,'').trim(),
-        cabang:(cols[5]||'').replace(/"/g,'').trim(),
+        nama:  c(3),  // NAMA SANTRI
+        nisn:  c(2),  // NIK
+        nipd:  '',    // tidak ada di sheet
+        kelas: c(1),  // KELAS (TODDLER/PRE K/K1/K2)
+        cabang:'',    // tidak ada di sheet, biarkan kosong
       };
-    }).filter(s=>s.nama);
+    }).filter(s=>s.nama && s.nama !== 'NAMA SANTRI');
     statusEl.className='status-pill status-ok';
     statusEl.innerHTML=`<span class="status-dot" style="background:#22c55e"></span>Sheets Terhubung (${state.santriList.length} santri)`;
   }catch(e){
@@ -984,6 +986,7 @@ function saveToDatabase(){
   };
   fetch(APPS_SCRIPT_URL, {
     method: 'POST',
+    mode: 'no-cors', // Apps Script melakukan redirect, perlu no-cors
     headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(payload)
   }).catch(()=>{}); // Silent fail — PDF tetap jalan
