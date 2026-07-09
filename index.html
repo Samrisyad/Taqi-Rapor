@@ -1427,6 +1427,37 @@ async function generateNarasi(idx) {
 // SCAN FEATURE
 // ══════════════════════════════════════════
 
+// Map from scan.js JSON keys → display label (untuk showScanPreview & applyScannedData)
+const SCAN_POIN_MAP = {
+  akhlakGuru:           'Akhlak Kepada Guru',
+  akhlakTeman:          'Akhlak Kepada Teman',
+  kemandirian:          'Kemandirian',
+  kedisiplinan:         'Kedisiplinan',
+  karakterKekhalifahan: 'Karakter Kekhalifahan',
+  sosialEmosional:      'Sosial Emosional',
+  tahfidzQuran:         "Tahfidz Qur'an",
+  tahsin:               "Tahsin Karimah & Al-Qur'an",
+  hadits:               'Hadits',
+  doa:                  'Doa',
+  asmaulHusna:          'Asmaul Husna',
+  syairIslami:          'Syair Islami',
+  dalil:                'Dalil',
+  ibadahSholat:         'Ibadah Sholat',
+  bahasaArab:           'Bahasa Arab Dan Inggris',
+  tadabbur:             "Tadabbur Al-Qur'an",
+  terjemahQuran:        "Terjemah Al-Qur'an",
+  tauhid:               'Tauhid : Mengenal Allah',
+  fiqih:                'Materi Fiqih',
+  adabAkhlaq:           'Adab dan Akhlaq',
+  materiTema:           'Materi Tema',
+  kisahNabi:            'Kisah Nabi dan Para Sahabat',
+  kisahIlmuwan:         'Kisah Ilmuwan Muslim dan Sifat Rasulullah ﷺ',
+  kemampuanBahasa:      'Kemampuan Bahasa',
+  kognitif:             'Kognitif',
+  motorik:              'Motorik',
+  kreatifitas:          'Kreatifitas',
+};
+
 let _scanBuffer   = [];   // array of scan results (one per photo)
 let _cameraStream = null; // active MediaStream
 let _photoQueue   = [];   // array of base64 dataURLs captured from camera
@@ -1461,13 +1492,20 @@ async function startCamera() {
   document.getElementById('scan-camera-view').style.display = 'flex';
 
   try {
-    _cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }
-    });
+    // Coba dulu exact back camera; kalau gagal (device lama), fallback ke ideal
+    try {
+      _cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: 'environment' }, width: { ideal: 1280 } }
+      });
+    } catch (_) {
+      _cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 } }
+      });
+    }
     const video = document.getElementById('scan-video');
     video.srcObject = _cameraStream;
-    // NO mirror — back camera should show correctly
-    video.style.transform = '';
+    // Pastikan tidak ada CSS mirror — back camera tidak perlu di-flip
+    video.style.transform = 'scaleX(1)';
   } catch (err) {
     alert('Kamera tidak bisa dibuka: ' + err.message);
     document.getElementById('scan-methods-ui').style.display = 'flex';
