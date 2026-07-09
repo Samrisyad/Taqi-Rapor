@@ -241,7 +241,7 @@ textarea{resize:vertical}
 /* Scan method modal */
 .scan-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
 .scan-modal-overlay.active{display:flex}
-.scan-modal-box{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.scan-modal-box{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .scan-modal-title{font-weight:700;font-size:16px;color:#1a1a2e;margin-bottom:4px}
 .scan-modal-sub{font-size:12px;color:#888;margin-bottom:20px}
 .scan-methods{display:flex;gap:10px}
@@ -250,26 +250,42 @@ textarea{resize:vertical}
 .scan-method-icon{font-size:28px;display:block;margin-bottom:6px}
 .scan-method-label{font-size:12px;font-weight:700;color:#3730a3}
 .scan-method-sub{font-size:10px;color:#888;margin-top:2px}
-.scan-loading{text-align:center;padding:20px 0;display:none}
+.scan-loading{text-align:center;padding:16px 0;display:none}
 .scan-loading-spinner{font-size:32px;display:block;margin-bottom:8px;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .scan-loading-text{font-size:13px;color:#555}
-
+/* Camera preview */
+.scan-camera-view{display:none;flex-direction:column;gap:10px}
+.scan-camera-video{width:100%;border-radius:10px;background:#000;max-height:220px;object-fit:cover}
+.scan-camera-actions{display:flex;gap:8px;justify-content:center}
+.scan-thumb-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.scan-thumb{width:52px;height:52px;border-radius:6px;object-fit:cover;border:2px solid #6366f1}
+.scan-photo-count{font-size:12px;color:#6366f1;font-weight:700;text-align:center;margin-top:4px}
+.btn-capture{background:#6366f1;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-capture:hover{background:#4f46e5}
+.btn-scan-done{background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;display:none}
+.btn-scan-done:hover{background:#15803d}
 /* Scan preview modal */
 .scan-preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .scan-preview-overlay.active{display:flex}
-.scan-preview-box{background:#fff;border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35);margin:auto}
+.scan-preview-box{background:#fff;border-radius:16px;width:100%;max-width:540px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35);margin:auto}
 .scan-preview-header{background:#1e293b;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
 .scan-preview-title{font-weight:700;font-size:14px}
-.scan-preview-body{padding:16px;max-height:70vh;overflow-y:auto}
+.scan-preview-body{padding:16px;max-height:72vh;overflow-y:auto}
 .scan-section{margin-bottom:14px}
 .scan-section-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #f1f5f9;padding-bottom:4px;margin-bottom:8px}
-.scan-row{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:12px}
-.scan-row-key{width:130px;color:#64748b;flex-shrink:0;padding-top:2px}
+.scan-row{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:12px}
+.scan-row-key{width:130px;color:#64748b;flex-shrink:0;padding-top:4px;line-height:1.3}
 .scan-row-val{flex:1;font-weight:600;color:#1e293b}
-.scan-row-val.uncertain{color:#d97706}
-.scan-badge-warn{font-size:9px;background:#fef3c7;border:1px solid #fbbf24;border-radius:3px;padding:0 4px;color:#92400e;font-weight:700;margin-left:4px;vertical-align:middle}
-.scan-editable{width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;font-size:12px;color:#1e293b;margin-top:4px;font-family:inherit;resize:vertical}
+.scan-row.conflict{background:#fff7ed;border-radius:6px;padding:4px 6px;border-left:3px solid #f97316}
+.scan-conflict-label{font-size:10px;color:#ea580c;font-weight:700;margin-bottom:3px}
+.scan-conflict-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.scan-conflict-pill{border:2px solid #e2e8f0;border-radius:8px;padding:2px 12px;font-size:12px;font-weight:700;cursor:pointer;background:#f8fafc;transition:all .15s}
+.scan-conflict-pill:hover{border-color:#6366f1}
+.scan-conflict-pill.selected{border-color:#16a34a;background:#dcfce7;color:#166534}
+.scan-conflict-pill.MB{color:#991b1b}.scan-conflict-pill.BCB{color:#92400e}.scan-conflict-pill.BSB{color:#166534}
+.scan-editable{width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:4px 7px;font-size:12px;color:#1e293b;font-family:inherit;box-sizing:border-box}
+.scan-evidence-ta{width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:4px 7px;font-size:11px;color:#475569;font-family:inherit;resize:vertical;min-height:34px;box-sizing:border-box;margin-top:3px}
 .scan-level-pill{display:inline-block;font-size:11px;font-weight:700;padding:1px 10px;border-radius:10px}
 .scan-level-pill.BSB{background:#dcfce7;color:#166534}
 .scan-level-pill.BCB{background:#fef3c7;color:#92400e}
@@ -1344,37 +1360,52 @@ async function generateNarasi(idx) {
 <div class="scan-modal-overlay" id="scan-modal">
   <div class="scan-modal-box">
     <div class="scan-modal-title">📷 Scan Lembar Penilaian</div>
-    <div class="scan-modal-sub">Pilih cara mengambil foto lembar penilaian musyrifah</div>
+    <div class="scan-modal-sub" id="scan-modal-sub">Pilih cara mengambil foto — bisa lebih dari 1 foto</div>
+
+    <!-- Method picker -->
     <div class="scan-methods" id="scan-methods-ui">
-      <div class="scan-method-btn" onclick="triggerScanInput('camera')">
+      <div class="scan-method-btn" onclick="startCamera()">
         <span class="scan-method-icon">📷</span>
         <div class="scan-method-label">Kamera</div>
         <div class="scan-method-sub">Foto langsung</div>
       </div>
-      <div class="scan-method-btn" onclick="triggerScanInput('gallery')">
+      <div class="scan-method-btn" onclick="triggerGallery()">
         <span class="scan-method-icon">🖼️</span>
         <div class="scan-method-label">Galeri</div>
         <div class="scan-method-sub">Pilih dari HP</div>
       </div>
-      <div class="scan-method-btn" onclick="triggerScanInput('file')">
+      <div class="scan-method-btn" onclick="triggerGallery()">
         <span class="scan-method-icon">📁</span>
         <div class="scan-method-label">Upload</div>
         <div class="scan-method-sub">PNG / JPG</div>
       </div>
     </div>
+
+    <!-- Camera live preview -->
+    <div class="scan-camera-view" id="scan-camera-view">
+      <video id="scan-video" class="scan-camera-video" autoplay playsinline muted></video>
+      <div class="scan-thumb-row" id="scan-thumb-row"></div>
+      <div class="scan-photo-count" id="scan-photo-count" style="display:none"></div>
+      <div class="scan-camera-actions">
+        <button class="btn-capture" onclick="capturePhoto()">📸 Ambil Foto</button>
+        <button class="btn-scan-done" id="btn-scan-done" onclick="processPhotoQueue()">✅ Scan <span id="scan-done-count"></span> Foto</button>
+      </div>
+    </div>
+
+    <!-- Loading state -->
     <div class="scan-loading" id="scan-loading">
       <span class="scan-loading-spinner">⏳</span>
-      <div class="scan-loading-text">Membaca lembar penilaian…<br>Mohon tunggu sebentar</div>
+      <div class="scan-loading-text" id="scan-loading-text">Membaca lembar penilaian…<br>Mohon tunggu sebentar</div>
     </div>
+
     <div style="margin-top:16px;text-align:right">
       <button class="btn-cancel-scan" onclick="closeScanModal()">Batal</button>
     </div>
   </div>
 </div>
 
-<!-- Hidden file inputs -->
-<input type="file" id="scan-input-camera" accept="image/*" capture="environment" style="display:none" onchange="handleScanFile(this)">
-<input type="file" id="scan-input-gallery" accept="image/*" style="display:none" onchange="handleScanFile(this)">
+<!-- Hidden file input (multi) -->
+<input type="file" id="scan-input-gallery" accept="image/*" multiple style="display:none" onchange="handleGalleryFiles(this)">
 
 <!-- SCAN PREVIEW MODAL -->
 <div class="scan-preview-overlay" id="scan-preview-modal">
@@ -1396,39 +1427,26 @@ async function generateNarasi(idx) {
 // SCAN FEATURE
 // ══════════════════════════════════════════
 
-let _scanResult = null;
+let _scanBuffer   = [];   // array of scan results (one per photo)
+let _cameraStream = null; // active MediaStream
+let _photoQueue   = [];   // array of base64 dataURLs captured from camera
+let _scanResult   = null; // final merged result for preview
 
-// Mapping: JSON key → poin nama (partial match, lowercase)
-const SCAN_POIN_MAP = {
-  akhlakGuru:           'Akhlak Kepada Guru',
-  akhlakTeman:          'Akhlak Kepada Teman',
-  kemandirian:          'Kemandirian',
-  kedisiplinan:         'Kedisiplinan',
-  karakterKekhalifahan: 'Karakter Kekhalifahan',
-  sosialEmosional:      'Sosial Emosional',
-  tahfidzQuran:         "Tahfidz Qur'an",
-  tahsin:               'Tahsin',
-  hadits:               'Hadits',
-  doa:                  'Doa',
-  asmaulHusna:          'Asmaul Husna',
-  syairIslami:          'Syair Islami',
-  tauhid:               'Tauhid',
-  fiqih:                'Fiqih',
-  adabAkhlaq:           'Adab',
-  materiTema:           'Materi Tema',
-  bahasa:               'Kemampuan Bahasa',
-  kognitif:             'Kognitif',
-  motorik:              'Motorik',
-  kreatifitas:          'Kreatifitas',
-};
-
+// ── Open / Close ──────────────────────────────────────────────────────────
 function openScanModal() {
+  _scanBuffer  = [];
+  _photoQueue  = [];
   document.getElementById('scan-modal').classList.add('active');
   document.getElementById('scan-methods-ui').style.display = 'flex';
-  document.getElementById('scan-loading').style.display = 'none';
+  document.getElementById('scan-camera-view').style.display = 'none';
+  document.getElementById('scan-loading').style.display    = 'none';
+  document.getElementById('scan-thumb-row').innerHTML      = '';
+  document.getElementById('scan-photo-count').style.display = 'none';
+  document.getElementById('btn-scan-done').style.display   = 'none';
 }
 
 function closeScanModal() {
+  stopCamera();
   document.getElementById('scan-modal').classList.remove('active');
 }
 
@@ -1437,58 +1455,147 @@ function closeScanPreview() {
   _scanResult = null;
 }
 
-function triggerScanInput(mode) {
-  if (mode === 'camera') {
-    document.getElementById('scan-input-camera').click();
-  } else {
-    document.getElementById('scan-input-gallery').click();
+// ── Camera (getUserMedia) ─────────────────────────────────────────────────
+async function startCamera() {
+  document.getElementById('scan-methods-ui').style.display  = 'none';
+  document.getElementById('scan-camera-view').style.display = 'flex';
+
+  try {
+    _cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }
+    });
+    const video = document.getElementById('scan-video');
+    video.srcObject = _cameraStream;
+    // NO mirror — back camera should show correctly
+    video.style.transform = '';
+  } catch (err) {
+    alert('Kamera tidak bisa dibuka: ' + err.message);
+    document.getElementById('scan-methods-ui').style.display = 'flex';
+    document.getElementById('scan-camera-view').style.display = 'none';
   }
 }
 
-function handleScanFile(inputEl) {
-  const file = inputEl.files[0];
-  if (!file) return;
-  inputEl.value = '';
+function stopCamera() {
+  if (_cameraStream) {
+    _cameraStream.getTracks().forEach(t => t.stop());
+    _cameraStream = null;
+  }
+  const video = document.getElementById('scan-video');
+  if (video) video.srcObject = null;
+}
 
-  // Show loading
-  document.getElementById('scan-methods-ui').style.display = 'none';
+function capturePhoto() {
+  const video = document.getElementById('scan-video');
+  const canvas = document.createElement('canvas');
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  _photoQueue.push(dataUrl);
+
+  // Add thumbnail
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.className = 'scan-thumb';
+  document.getElementById('scan-thumb-row').appendChild(img);
+
+  // Update counter + show Scan button
+  const count = _photoQueue.length;
+  const countEl = document.getElementById('scan-photo-count');
+  countEl.textContent = count + ' foto siap di-scan';
+  countEl.style.display = 'block';
+  const doneBtn = document.getElementById('btn-scan-done');
+  document.getElementById('scan-done-count').textContent = count;
+  doneBtn.style.display = 'inline-block';
+}
+
+async function processPhotoQueue() {
+  if (_photoQueue.length === 0) return;
+  stopCamera();
+  document.getElementById('scan-camera-view').style.display = 'none';
   document.getElementById('scan-loading').style.display = 'block';
 
-  // Compress + convert to base64
-  const reader = new FileReader();
-  reader.onload = async (e) => {
+  for (let i = 0; i < _photoQueue.length; i++) {
+    document.getElementById('scan-loading-text').innerHTML =
+      `Memproses foto ${i+1} dari ${_photoQueue.length}…<br>Mohon tunggu sebentar`;
     try {
-      const base64 = await compressImage(e.target.result, 1200, 0.85);
-      // Remove data:image/...;base64, prefix
-      const b64data = base64.split(',')[1];
-
+      const compressed = await compressImage(_photoQueue[i], 1200, 0.85);
+      const b64 = compressed.split(',')[1];
       const resp = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: b64data })
+        body: JSON.stringify({ image: b64 })
       });
-
       const json = await resp.json();
-      if (!resp.ok || json.error) throw new Error(json.error || 'Gagal memproses');
-
-      closeScanModal();
-      showScanPreview(json.result);
+      if (!resp.ok || json.error) throw new Error(json.error || 'Gagal');
+      _scanBuffer.push(json.result);
     } catch (err) {
-      closeScanModal();
-      alert('Gagal scan: ' + err.message);
+      console.warn('Foto ' + (i+1) + ' gagal: ' + err.message);
     }
-  };
-  reader.readAsDataURL(file);
+  }
+
+  document.getElementById('scan-loading').style.display = 'none';
+  closeScanModal();
+  if (_scanBuffer.length === 0) { alert('Tidak ada foto yang berhasil di-scan.'); return; }
+  showScanPreview(mergeScans(_scanBuffer));
 }
 
-// Compress image to max width, returns base64 data URL
+// ── Gallery / File (multi-select) ─────────────────────────────────────────
+function triggerGallery() {
+  document.getElementById('scan-input-gallery').click();
+}
+
+async function handleGalleryFiles(inputEl) {
+  const files = Array.from(inputEl.files);
+  inputEl.value = '';
+  if (!files.length) return;
+
+  document.getElementById('scan-methods-ui').style.display = 'none';
+  document.getElementById('scan-loading').style.display = 'block';
+
+  for (let i = 0; i < files.length; i++) {
+    document.getElementById('scan-loading-text').innerHTML =
+      `Memproses foto ${i+1} dari ${files.length}…<br>Mohon tunggu sebentar`;
+    try {
+      const dataUrl = await readFileAsDataUrl(files[i]);
+      const compressed = await compressImage(dataUrl, 1200, 0.85);
+      const b64 = compressed.split(',')[1];
+      const resp = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: b64 })
+      });
+      const json = await resp.json();
+      if (!resp.ok || json.error) throw new Error(json.error || 'Gagal');
+      _scanBuffer.push(json.result);
+    } catch (err) {
+      console.warn('File ' + (i+1) + ' gagal: ' + err.message);
+    }
+  }
+
+  document.getElementById('scan-loading').style.display = 'none';
+  closeScanModal();
+  if (_scanBuffer.length === 0) { alert('Tidak ada foto yang berhasil di-scan.'); return; }
+  showScanPreview(mergeScans(_scanBuffer));
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Image compression ─────────────────────────────────────────────────────
 function compressImage(dataUrl, maxW, quality) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
       const ratio = Math.min(1, maxW / img.width);
       const canvas = document.createElement('canvas');
-      canvas.width = img.width * ratio;
+      canvas.width  = img.width * ratio;
       canvas.height = img.height * ratio;
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       resolve(canvas.toDataURL('image/jpeg', quality));
@@ -1497,55 +1604,125 @@ function compressImage(dataUrl, maxW, quality) {
   });
 }
 
+// ── Merge multiple scan results ───────────────────────────────────────────
+function mergeScans(buffer) {
+  const merged = {
+    santri: {}, presensi: {}, catatanMusyrifah: '',
+    penilaian: {}
+  };
+
+  for (const result of buffer) {
+    // Santri: first non-empty wins
+    for (const [k, v] of Object.entries(result.santri || {})) {
+      if (!merged.santri[k] && v) merged.santri[k] = v;
+    }
+    // Presensi: first non-null wins
+    for (const [k, v] of Object.entries(result.presensi || {})) {
+      if (merged.presensi[k] === undefined || merged.presensi[k] === null) {
+        merged.presensi[k] = v;
+      }
+    }
+    // Catatan: concatenate unique
+    if (result.catatanMusyrifah && result.catatanMusyrifah.trim()) {
+      const cat = result.catatanMusyrifah.trim();
+      if (!merged.catatanMusyrifah.includes(cat)) {
+        merged.catatanMusyrifah += (merged.catatanMusyrifah ? '\n' : '') + cat;
+      }
+    }
+    // Penilaian: merge with conflict detection
+    for (const [k, p] of Object.entries(result.penilaian || {})) {
+      if (!p || p.level === null) continue;
+      const ev = (p.evidence || '').trim();
+
+      if (!merged.penilaian[k]) {
+        merged.penilaian[k] = { level: p.level, evidence: ev, _conflicts: null };
+      } else {
+        // Level conflict?
+        if (merged.penilaian[k].level !== p.level) {
+          if (!merged.penilaian[k]._conflicts) {
+            merged.penilaian[k]._conflicts = [merged.penilaian[k].level];
+          }
+          if (!merged.penilaian[k]._conflicts.includes(p.level)) {
+            merged.penilaian[k]._conflicts.push(p.level);
+          }
+        }
+        // Evidence: append unique
+        if (ev && !merged.penilaian[k].evidence.includes(ev)) {
+          merged.penilaian[k].evidence += (merged.penilaian[k].evidence ? '; ' : '') + ev;
+        }
+      }
+    }
+  }
+  return merged;
+}
+
+// ── Preview modal ─────────────────────────────────────────────────────────
 function showScanPreview(result) {
   _scanResult = result;
-
   const penilaian = result.penilaian || {};
-  const santri = result.santri || {};
-  const presensi = result.presensi || {};
+  const santri    = result.santri    || {};
+  const presensi  = result.presensi  || {};
 
-  // Count found fields
-  const totalPoin = Object.keys(penilaian).length;
-  const foundPoin = Object.values(penilaian).filter(v => v !== null).length;
-  const foundSantri = Object.values(santri).filter(v => v && v !== '').length;
+  const totalPoin  = Object.keys(SCAN_POIN_MAP).length;
+  const foundPoin  = Object.values(penilaian).filter(v => v && v.level).length;
+  const conflicts  = Object.values(penilaian).filter(v => v && v._conflicts).length;
 
   let html = `<div class="scan-info-box">
     ✅ <b>${foundPoin} dari ${totalPoin} poin</b> berhasil terbaca.
-    ${foundPoin < totalPoin ? ' Field bertanda ⚠️ perlu dicek.' : ''}
+    ${conflicts ? `<b style="color:#ea580c"> ${conflicts} konflik</b> — pilih nilai yang benar di bawah.` : ''}
+    ${foundPoin < totalPoin ? ' Poin kosong bisa diisi manual.' : ''}
   </div>`;
 
-  // Santri section
+  // Data santri
   html += `<div class="scan-section"><div class="scan-section-title">Data Santri</div>`;
   const santriLabels = {nama:'Nama',nis:'NIS',kelas:'Kelas',semester:'Semester',tahunAjaran:'Tahun Ajaran',cabang:'Cabang'};
   for (const [k, label] of Object.entries(santriLabels)) {
-    const val = santri[k];
+    const val = santri[k] || '';
     html += `<div class="scan-row">
       <span class="scan-row-key">${label}</span>
-      <span class="scan-row-val ${val ? '' : 'uncertain'}">
-        <input class="scan-editable" style="padding:3px 6px;height:26px" id="sp-${k}" value="${escHtml(val||'')}" placeholder="—">
+      <span class="scan-row-val">
+        <input class="scan-editable" id="sp-${k}" value="${escHtml(val)}" placeholder="—">
       </span>
     </div>`;
   }
   html += `</div>`;
 
-  // Penilaian section
+  // Penilaian
   html += `<div class="scan-section"><div class="scan-section-title">Penilaian per Poin</div>`;
   for (const [key, label] of Object.entries(SCAN_POIN_MAP)) {
-    const val = penilaian[key];
-    const pillCls = val || 'null';
-    const warn = val === null ? `<span class="scan-badge-warn">⚠️</span>` : '';
-    html += `<div class="scan-row">
-      <span class="scan-row-key">${label}</span>
-      <span class="scan-row-val">
-        <select class="scan-editable" style="height:26px;padding:0 4px" id="sp-poin-${key}">
-          <option value=""${!val?' selected':''}>— tidak terbaca —</option>
-          <option value="MB"${val==='MB'?' selected':''}>MB</option>
-          <option value="BCB"${val==='BCB'?' selected':''}>BCB</option>
-          <option value="BSB"${val==='BSB'?' selected':''}>BSB</option>
-        </select>
-        ${warn}
-      </span>
-    </div>`;
+    const p = penilaian[key];
+    const level    = p ? (p.level || '') : '';
+    const evidence = p ? (p.evidence || '') : '';
+    const hasConflict = p && p._conflicts;
+
+    if (hasConflict) {
+      // Conflict row — show pills to choose
+      const pillsHtml = p._conflicts.map(lv =>
+        `<span class="scan-conflict-pill ${lv}" data-key="${key}" data-level="${lv}" onclick="selectConflictLevel(this,'${key}')">${lv}</span>`
+      ).join('');
+      html += `<div class="scan-row conflict" id="scanrow-${key}">
+        <span class="scan-row-key">${label}</span>
+        <span class="scan-row-val">
+          <div class="scan-conflict-label">⚠️ Konflik — pilih nilai:</div>
+          <div class="scan-conflict-pills">${pillsHtml}</div>
+          <input type="hidden" id="sp-poin-${key}" value="">
+          <textarea class="scan-evidence-ta" id="sp-ev-${key}" placeholder="Evidence (opsional)">${escHtml(evidence)}</textarea>
+        </span>
+      </div>`;
+    } else {
+      html += `<div class="scan-row" id="scanrow-${key}">
+        <span class="scan-row-key">${label}</span>
+        <span class="scan-row-val">
+          <select class="scan-editable" id="sp-poin-${key}" style="height:26px;padding:0 4px">
+            <option value=""${!level?' selected':''}>— tidak terbaca —</option>
+            <option value="MB"${level==='MB'?' selected':''}>MB</option>
+            <option value="BCB"${level==='BCB'?' selected':''}>BCB</option>
+            <option value="BSB"${level==='BSB'?' selected':''}>BSB</option>
+          </select>
+          <textarea class="scan-evidence-ta" id="sp-ev-${key}" placeholder="Evidence (opsional)">${escHtml(evidence)}</textarea>
+        </span>
+      </div>`;
+    }
   }
   html += `</div>`;
 
@@ -1557,49 +1734,47 @@ function showScanPreview(result) {
     html += `<div class="scan-row">
       <span class="scan-row-key">${label}</span>
       <span class="scan-row-val">
-        <input class="scan-editable" type="number" style="height:26px;padding:3px 6px;width:80px" id="sp-pres-${k}" value="${val !== null && val !== undefined ? val : '0'}" min="0">
+        <input class="scan-editable" type="number" id="sp-pres-${k}" value="${val !== null && val !== undefined ? val : '0'}" min="0" style="width:80px">
       </span>
     </div>`;
   }
   html += `</div>`;
 
   // Catatan
-  const catatan = result.catatanMusyrifah || '';
   html += `<div class="scan-section"><div class="scan-section-title">Catatan Musyrifah</div>
-    <textarea class="scan-editable" id="sp-catatan" rows="3">${escHtml(catatan)}</textarea>
+    <textarea class="scan-editable" id="sp-catatan" rows="3" style="resize:vertical">${escHtml(result.catatanMusyrifah||'')}</textarea>
   </div>`;
 
   document.getElementById('scan-preview-body').innerHTML = html;
   document.getElementById('scan-preview-modal').classList.add('active');
 }
 
+function selectConflictLevel(pillEl, key) {
+  // Deselect siblings
+  pillEl.closest('.scan-conflict-pills').querySelectorAll('.scan-conflict-pill').forEach(p => p.classList.remove('selected'));
+  pillEl.classList.add('selected');
+  document.getElementById('sp-poin-' + key).value = pillEl.dataset.level;
+}
+
+// ── Apply to form ─────────────────────────────────────────────────────────
 function applyScannedData() {
-  // Apply santri data
-  const fieldMap = {
-    nama: 'f-nama', nis: 'f-nisn', tahunAjaran: 'f-tahun'
-  };
+  // Santri fields
+  const fieldMap = { nama: 'f-nama', nis: 'f-nisn', tahunAjaran: 'f-tahun' };
   for (const [scanKey, formId] of Object.entries(fieldMap)) {
     const val = document.getElementById('sp-' + scanKey)?.value?.trim();
-    if (val) {
-      const el = document.getElementById(formId);
-      if (el) el.value = val;
-    }
+    if (val) { const el = document.getElementById(formId); if (el) el.value = val; }
   }
 
-  // Kelas — try to match select option
+  // Kelas
   const kelasVal = document.getElementById('sp-kelas')?.value?.trim();
   if (kelasVal) {
     const kelasEl = document.getElementById('f-kelas');
     if (kelasEl) {
       const opts = Array.from(kelasEl.options);
-      // Try exact match first, then partial
       const match = opts.find(o => o.value === kelasVal) ||
                     opts.find(o => o.value.toLowerCase().includes(kelasVal.toLowerCase()) ||
-                                   kelasVal.toLowerCase().includes(o.value.toLowerCase().split('-')[0]));
-      if (match) {
-        kelasEl.value = match.value;
-        onKelasChange(match.value);
-      }
+                                   kelasVal.toLowerCase().includes(o.value.toLowerCase()));
+      if (match) { kelasEl.value = match.value; onKelasChange(match.value); }
     }
   }
 
@@ -1625,32 +1800,34 @@ function applyScannedData() {
     }
   }
 
-  // Penilaian — match by poin nama (partial)
+  // Penilaian — level + evidence
   for (const [scanKey, poinNama] of Object.entries(SCAN_POIN_MAP)) {
-    const level = document.getElementById('sp-poin-' + scanKey)?.value;
-    if (!level) continue;
+    const level    = document.getElementById('sp-poin-' + scanKey)?.value;
+    const evidence = document.getElementById('sp-ev-' + scanKey)?.value?.trim() || '';
+    if (!level && !evidence) continue;
     const poin = state.assessment.find(a =>
-      a.nama.toLowerCase().includes(poinNama.toLowerCase()) ||
-      poinNama.toLowerCase().includes(a.nama.toLowerCase().split(':')[0].trim())
+      a.nama.toLowerCase().replace(/[^a-z]/g,'').includes(poinNama.toLowerCase().replace(/[^a-z]/g,'')) ||
+      poinNama.toLowerCase().replace(/[^a-z]/g,'').includes(a.nama.toLowerCase().replace(/[^a-z]/g,'').split(':')[0])
     );
-    if (poin) poin.level = level;
+    if (poin) {
+      if (level) poin.level = level;
+      if (evidence) poin.evidence = evidence;
+    }
   }
 
   // Presensi
   const sakit = document.getElementById('sp-pres-sakit')?.value;
-  const izin = document.getElementById('sp-pres-izin')?.value;
-  const alpa = document.getElementById('sp-pres-tanpaKeterangan')?.value;
+  const izin  = document.getElementById('sp-pres-izin')?.value;
+  const alpa  = document.getElementById('sp-pres-tanpaKeterangan')?.value;
   if (sakit !== undefined) document.getElementById('abs-sakit').value = sakit || 0;
-  if (izin !== undefined) document.getElementById('abs-izin').value = izin || 0;
-  if (alpa !== undefined) document.getElementById('abs-alpa').value = alpa || 0;
+  if (izin  !== undefined) document.getElementById('abs-izin').value  = izin  || 0;
+  if (alpa  !== undefined) document.getElementById('abs-alpa').value  = alpa  || 0;
 
   // Catatan
   const catatan = document.getElementById('sp-catatan')?.value?.trim();
   if (catatan) document.getElementById('f-catatan').value = catatan;
 
-  // Re-render assessment
   renderAssessment();
-
   closeScanPreview();
   alert('✅ Data berhasil diterapkan ke form!');
 }
