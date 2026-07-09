@@ -13,21 +13,50 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'API key not configured' });
   }
 
-  const prompt = `Kamu adalah sistem OCR untuk lembar penilaian santri KB-TK Tarbiyah Qur'aniyah.
+  const prompt = `Kamu adalah sistem OCR untuk catatan penilaian santri KB-TK Tarbiyah Qur'aniyah yang ditulis tangan oleh musyrifah.
 
-Baca gambar lembar penilaian ini dan ekstrak data berikut dalam format JSON.
+Catatan ini TIDAK selalu berbentuk tabel rapi. Bisa berupa tulisan bebas, grid tidak beraturan, atau catatan acak di kertas. Yang penting: temukan nama poin dan nilainya.
 
-PENTING:
-- Level penilaian hanya 3 kemungkinan: "MB", "BCB", atau "BSB". Jangan tulis lain.
-- Jika tidak terbaca / tidak ada, isi dengan null.
-- Untuk nama domain, cocokkan dengan daftar di bawah (boleh fuzzy match).
+ATURAN PENTING:
+- Nilai penilaian HANYA 3 kemungkinan: "MB", "BCB", atau "BSB" (bisa ditulis huruf kecil/kapital)
+- Evidence adalah teks kecil/catatan yang ditulis di bawah atau di samping nilai poin (dalam kurung, atau teks kecil setelah nilai)
+- Jika poin tidak ditemukan atau tidak terbaca → level: null, evidence: ""
+- Kembalikan HANYA JSON, tanpa teks lain, tanpa markdown
 
-Format JSON yang harus dikembalikan (HANYA JSON, tanpa teks lain):
+DAFTAR POIN VALID dan ALIAS-nya (gunakan fuzzy match — cocokkan meskipun penulisan berbeda):
+- "Akhlak Guru" / "Akhlak Kepada Guru" → akhlakGuru
+- "Akhlak Teman" / "Akhlak Kepada Teman" → akhlakTeman
+- "Kemandirian" / "Mandiri" → kemandirian
+- "Kedisiplinan" / "Disiplin" → kedisiplinan
+- "Kekhalifahan" / "Karakter Kekhalifahan" / "Khalifah" / "Kepemimpinan" → karakterKekhalifahan
+- "Sosial Emosional" / "Sosem" / "Sosial" → sosialEmosional
+- "Tahfidz" / "Tahfidz Qur'an" / "Hafalan Quran" → tahfidzQuran
+- "Tahsin" / "Tahsin Karimah" / "Baca Quran" → tahsin
+- "Hadits" / "Hafalan Hadits" → hadits
+- "Doa" / "Hafalan Doa" / "Doa Harian" → doa
+- "Asmaul Husna" / "Asma" / "Asmaul" → asmaulHusna
+- "Syair" / "Syair Islami" / "Nasyid" → syairIslami
+- "Dalil" / "Hafalan Dalil" → dalil
+- "Ibadah Sholat" / "Sholat" / "Praktek Sholat" → ibadahSholat
+- "Bahasa Arab" / "Bahasa Arab Inggris" / "Mufrodat" → bahasaArab
+- "Tadabbur" / "Tadabbur Quran" → tadabbur
+- "Terjemah" / "Terjemah Quran" → terjemahQuran
+- "Tauhid" / "Mengenal Allah" / "Aqidah" → tauhid
+- "Fiqih" / "Materi Fiqih" / "Fikih" → fiqih
+- "Adab" / "Adab Akhlaq" / "Adab dan Akhlaq" → adabAkhlaq
+- "Materi Tema" / "Tema" / "Pengetahuan Umum" → materiTema
+- "Kisah Nabi" / "Kisah Para Nabi" / "Sirah" → kisahNabi
+- "Kisah Ilmuwan" / "Kisah Teladan" / "Ilmuwan Muslim" → kisahIlmuwan
+- "Bahasa" / "Kemampuan Bahasa" / "Bahasa Indonesia" → kemampuanBahasa
+- "Kognitif" / "Berpikir" / "Akademik" → kognitif
+- "Motorik" / "Fisik" / "Gerak" → motorik
+- "Kreatifitas" / "Kreativitas" / "Seni" / "Kreasi" → kreatifitas
+
+FORMAT JSON yang harus dikembalikan:
 {
   "santri": {
     "nama": "",
     "nis": "",
-    "nipd": "",
     "kelas": "",
     "semester": "",
     "tahunAjaran": "",
@@ -40,58 +69,42 @@ Format JSON yang harus dikembalikan (HANYA JSON, tanpa teks lain):
   },
   "catatanMusyrifah": "",
   "penilaian": {
-    "akhlakGuru": null,
-    "akhlakTeman": null,
-    "kemandirian": null,
-    "kedisiplinan": null,
-    "karakterKekhalifahan": null,
-    "sosialEmosional": null,
-    "tahfidzQuran": null,
-    "tahsin": null,
-    "hadits": null,
-    "doa": null,
-    "asmaulHusna": null,
-    "syairIslami": null,
-    "tauhid": null,
-    "fiqih": null,
-    "adabAkhlaq": null,
-    "materiTema": null,
-    "bahasa": null,
-    "kognitif": null,
-    "motorik": null,
-    "kreatifitas": null
+    "akhlakGuru":           { "level": null, "evidence": "" },
+    "akhlakTeman":          { "level": null, "evidence": "" },
+    "kemandirian":          { "level": null, "evidence": "" },
+    "kedisiplinan":         { "level": null, "evidence": "" },
+    "karakterKekhalifahan": { "level": null, "evidence": "" },
+    "sosialEmosional":      { "level": null, "evidence": "" },
+    "tahfidzQuran":         { "level": null, "evidence": "" },
+    "tahsin":               { "level": null, "evidence": "" },
+    "hadits":               { "level": null, "evidence": "" },
+    "doa":                  { "level": null, "evidence": "" },
+    "asmaulHusna":          { "level": null, "evidence": "" },
+    "syairIslami":          { "level": null, "evidence": "" },
+    "dalil":                { "level": null, "evidence": "" },
+    "ibadahSholat":         { "level": null, "evidence": "" },
+    "bahasaArab":           { "level": null, "evidence": "" },
+    "tadabbur":             { "level": null, "evidence": "" },
+    "terjemahQuran":        { "level": null, "evidence": "" },
+    "tauhid":               { "level": null, "evidence": "" },
+    "fiqih":                { "level": null, "evidence": "" },
+    "adabAkhlaq":           { "level": null, "evidence": "" },
+    "materiTema":           { "level": null, "evidence": "" },
+    "kisahNabi":            { "level": null, "evidence": "" },
+    "kisahIlmuwan":         { "level": null, "evidence": "" },
+    "kemampuanBahasa":      { "level": null, "evidence": "" },
+    "kognitif":             { "level": null, "evidence": "" },
+    "motorik":              { "level": null, "evidence": "" },
+    "kreatifitas":          { "level": null, "evidence": "" }
   }
 }
 
-Panduan mapping nama kolom di lembar ke key JSON:
-- "Akhlak Guru" / "Akhlak Kepada Guru" → akhlakGuru
-- "Akhlak Teman" / "Akhlak Kepada Teman" → akhlakTeman
-- "Kemandirian" → kemandirian
-- "Kedisiplinan" → kedisiplinan
-- "Kekhalifahan" / "Karakter Kekhalifahan" → karakterKekhalifahan
-- "Sosial Emosional" → sosialEmosional
-- "Tahfidz" / "Tahfidz Qur'an" → tahfidzQuran
-- "Tahsin" / "Tahsin Karimah" → tahsin
-- "Hadits" → hadits
-- "Doa" → doa
-- "Asmaul Husna" → asmaulHusna
-- "Syair Islami" → syairIslami
-- "Tauhid" → tauhid
-- "Fiqih" → fiqih
-- "Adab" / "Adab dan Akhlaq" → adabAkhlaq
-- "Materi Tema" → materiTema
-- "Bahasa" → bahasa
-- "Kognitif" → kognitif
-- "Motorik" → motorik
-- "Kreatifitas" / "Kreativitas" → kreatifitas
-- "Sakit" → presensi.sakit (angka)
-- "Izin" → presensi.izin (angka)
-- "Tanpa Keterangan" / "Alfa" / "Alpa" → presensi.tanpaKeterangan (angka)
-- "Catatan Musyrifah" / catatan tulis tangan di bawah tabel → catatanMusyrifah
-
-Untuk semester: jika tertulis "1" atau "Ganjil" → "1 Ganjil", jika "2" atau "Genap" → "2 Genap".
-Untuk kelas: jika tertulis "K2", "KB", "TK A", "TK B" — tulis apa adanya.
-Untuk tahun ajaran: jika tertulis "2025/2026" → "2025/2026" (pakai slash).`;
+CATATAN:
+- semester: "1" atau "Ganjil" → "1 (Ganjil)", "2" atau "Genap" → "2 (Genap)"
+- kelas: tulis apa adanya (K1, K2, PRE K, TODDLER, dll)
+- tahun ajaran: format "2025/2026" (pakai slash)
+- evidence: teks kecil/catatan di bawah atau di samping nilai poin (max 150 karakter). Jika tidak ada → ""
+- catatanMusyrifah: catatan umum di luar penilaian per poin, jika ada`;
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -108,9 +121,7 @@ Untuk tahun ajaran: jika tertulis "2025/2026" → "2025/2026" (pakai slash).`;
             content: [
               {
                 type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${image}`
-                }
+                image_url: { url: `data:image/jpeg;base64,${image}` }
               },
               {
                 type: 'text',
@@ -120,7 +131,7 @@ Untuk tahun ajaran: jika tertulis "2025/2026" → "2025/2026" (pakai slash).`;
           }
         ],
         temperature: 0.1,
-        max_tokens: 1500
+        max_tokens: 2000
       })
     });
 
@@ -132,12 +143,25 @@ Untuk tahun ajaran: jika tertulis "2025/2026" → "2025/2026" (pakai slash).`;
     const data = await response.json();
     const raw = data.choices[0].message.content.trim();
 
-    // Extract JSON from response (handle markdown code blocks)
+    // Extract JSON (handle markdown code blocks)
     let jsonStr = raw;
     const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (match) jsonStr = match[1].trim();
 
     const parsed = JSON.parse(jsonStr);
+
+    // Normalize level values
+    if (parsed.penilaian) {
+      for (const key of Object.keys(parsed.penilaian)) {
+        const p = parsed.penilaian[key];
+        if (p && p.level) {
+          p.level = p.level.toUpperCase().trim();
+          if (!['MB', 'BCB', 'BSB'].includes(p.level)) p.level = null;
+        }
+        if (p && !p.evidence) p.evidence = '';
+      }
+    }
+
     return res.status(200).json({ result: parsed });
 
   } catch (e) {
