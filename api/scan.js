@@ -114,7 +114,7 @@ CATATAN:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        model: 'qwen/qwen3.6-27b',
         messages: [
           {
             role: 'user',
@@ -131,7 +131,8 @@ CATATAN:
           }
         ],
         temperature: 0.1,
-        max_tokens: 2000
+        max_tokens: 2000,
+        chat_template_kwargs: { enable_thinking: false }
       })
     });
 
