@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No image provided' });
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY_2;
   if (!apiKey) {
     return res.status(500).json({ error: 'API key not configured' });
   }
@@ -107,41 +107,38 @@ CATATAN:
 - catatanMusyrifah: catatan umum di luar penilaian per poin, jika ada`;
 
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-        messages: [
-          {
-            role: 'user',
-            content: [
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
               {
-                type: 'image_url',
-                image_url: { url: `data:image/jpeg;base64,${image}` }
+                inline_data: {
+                  mime_type: 'image/jpeg',
+                  data: image
+                }
               },
-              {
-                type: 'text',
-                text: prompt
-              }
+              { text: prompt }
             ]
+          }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 2000
           }
-        ],
-        temperature: 0.1,
-        max_tokens: 2000
-      })
-    });
+        })
+      }
+    );
 
     if (!response.ok) {
       const err = await response.text();
-      return res.status(500).json({ error: 'Groq Vision error: ' + err });
+      return res.status(500).json({ error: 'Gemini Vision error: ' + err });
     }
 
     const data = await response.json();
-    const raw = data.choices[0].message.content.trim();
+    const raw = data.candidates[0].content.parts[0].text.trim();
 
     // Extract JSON (handle markdown code blocks)
     let jsonStr = raw;
