@@ -131,8 +131,7 @@ CATATAN:
           }
         ],
         temperature: 0.1,
-        max_tokens: 2000,
-        chat_template_kwargs: { enable_thinking: false }
+        max_tokens: 2000
       })
     });
 
