@@ -1553,6 +1553,7 @@ async function processPhotoQueue() {
   document.getElementById('scan-camera-view').style.display = 'none';
   document.getElementById('scan-loading').style.display = 'block';
 
+  let lastError = '';
   for (let i = 0; i < _photoQueue.length; i++) {
     document.getElementById('scan-loading-text').innerHTML =
       `Memproses foto ${i+1} dari ${_photoQueue.length}…<br>Mohon tunggu sebentar`;
@@ -1568,13 +1569,14 @@ async function processPhotoQueue() {
       if (!resp.ok || json.error) throw new Error(json.error || 'Gagal');
       _scanBuffer.push(json.result);
     } catch (err) {
+      lastError = err.message;
       console.warn('Foto ' + (i+1) + ' gagal: ' + err.message);
     }
   }
 
   document.getElementById('scan-loading').style.display = 'none';
   closeScanModal();
-  if (_scanBuffer.length === 0) { alert('Tidak ada foto yang berhasil di-scan.'); return; }
+  if (_scanBuffer.length === 0) { alert('Scan gagal. Error: ' + lastError); return; }
   showScanPreview(mergeScans(_scanBuffer));
 }
 
@@ -1591,6 +1593,7 @@ async function handleGalleryFiles(inputEl) {
   document.getElementById('scan-methods-ui').style.display = 'none';
   document.getElementById('scan-loading').style.display = 'block';
 
+  let lastError = '';
   for (let i = 0; i < files.length; i++) {
     document.getElementById('scan-loading-text').innerHTML =
       `Memproses foto ${i+1} dari ${files.length}…<br>Mohon tunggu sebentar`;
@@ -1607,13 +1610,14 @@ async function handleGalleryFiles(inputEl) {
       if (!resp.ok || json.error) throw new Error(json.error || 'Gagal');
       _scanBuffer.push(json.result);
     } catch (err) {
+      lastError = err.message;
       console.warn('File ' + (i+1) + ' gagal: ' + err.message);
     }
   }
 
   document.getElementById('scan-loading').style.display = 'none';
   closeScanModal();
-  if (_scanBuffer.length === 0) { alert('Tidak ada foto yang berhasil di-scan.'); return; }
+  if (_scanBuffer.length === 0) { alert('Scan gagal. Error: ' + lastError); return; }
   showScanPreview(mergeScans(_scanBuffer));
 }
 
