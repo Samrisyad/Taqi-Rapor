@@ -405,6 +405,9 @@ textarea{resize:vertical}
   </div>
 
   <!-- ── ASSESSMENT (rendered by JS) ── -->
+  <div style="margin-bottom:8px;text-align:right">
+    <button id="btn-generate-all" class="btn-ai" style="font-size:13px;padding:8px 16px" onclick="generateAll()">✨ Generate Semua Narasi</button>
+  </div>
   <div id="assessment-container"></div>
 
   <!-- ── PRESENSI ── -->
@@ -470,6 +473,9 @@ textarea{resize:vertical}
       <div class="card-hdr-title"><span class="sec-badge">VI</span> Catatan &amp; Rekomendasi Pendidik</div>
     </div>
     <div class="card-body">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+        <button class="btn-ai" id="btn-catatan-ai" onclick="generateCatatan()">✨ Generate AI</button>
+      </div>
       <textarea id="f-catatan" rows="5" placeholder="Tuliskan catatan dan rekomendasi untuk orang tua santri…"></textarea>
     </div>
   </div>
@@ -676,6 +682,17 @@ function setLevel(idx, level){
     btn.className='lvl-btn';
     if(btn.textContent.trim()===level) btn.classList.add(`act-${level}`);
   });
+  autoKesimpulan();
+}
+
+function autoKesimpulan(){
+  const filled = state.assessment.filter(a=>a.level);
+  if(!filled.length) return;
+  const counts = {MB:0, BCB:0, BSB:0};
+  filled.forEach(a=>{ if(counts[a.level]!==undefined) counts[a.level]++; });
+  const winner = counts.BSB>=counts.BCB && counts.BSB>=counts.MB ? 'BSB'
+    : counts.BCB>=counts.MB ? 'BCB' : 'MB';
+  setKesimpulan(winner);
 }
 
 function updateField(idx, field, val){ state.assessment[idx][field]=val; }
@@ -687,6 +704,60 @@ function setKesimpulan(val){
     el.className = 'kesim-opt'+(k===val?` sel-${k}`:'');
     el.querySelector('input').checked = (k===val);
   });
+}
+
+async function generateAll(){
+  const filled = state.assessment.filter(a=>a.level);
+  if(!filled.length){ alert('Isi dulu kelayakan perkembangan minimal satu poin.'); return; }
+  const nama  = document.getElementById('f-nama').value || 'Ananda';
+  const kelas = document.getElementById('f-kelas').value;
+  const btn   = document.getElementById('btn-generate-all');
+  btn.disabled = true; btn.textContent = '⏳ Generating…';
+  for(const p of filled){
+    const idx   = state.assessment.indexOf(p);
+    const aiBtn = document.getElementById(`ai-btn-${idx}`);
+    if(aiBtn){ aiBtn.disabled=true; aiBtn.textContent='⏳…'; }
+    try {
+      const resp = await fetch('/api/generate',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ poin:p.nama, level:p.level, evidence:p.evidence, namaSantri:nama, kelas })
+      });
+      const json = await resp.json();
+      if(!json.error){
+        state.assessment[idx].narasi = json.narasi;
+        const ta = document.getElementById(`narasi-ta-${idx}`);
+        if(ta) ta.value = json.narasi;
+      }
+    } catch(e){}
+    if(aiBtn){ aiBtn.disabled=false; aiBtn.textContent='✨ Generate AI'; }
+  }
+  btn.disabled=false; btn.textContent='✨ Generate Semua Narasi';
+}
+
+async function generateCatatan(){
+  const filled = state.assessment.filter(a=>a.level);
+  if(!filled.length){ alert('Isi dulu kelayakan perkembangan minimal satu poin.'); return; }
+  const nama  = document.getElementById('f-nama').value || 'Ananda';
+  const kelas = document.getElementById('f-kelas').value;
+  const poinBSB      = filled.filter(a=>a.level==='BSB').map(a=>a.nama);
+  const poinMB       = filled.filter(a=>a.level==='MB').map(a=>a.nama);
+  const poinBCB      = filled.filter(a=>a.level==='BCB').map(a=>a.nama);
+  const poinPerhatian = poinMB.length ? poinMB : poinBCB.slice(0,2);
+  const btn = document.getElementById('btn-catatan-ai');
+  btn.disabled=true; btn.textContent='⏳ Generating…';
+  try {
+    const resp = await fetch('/api/catatan',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ namaSantri:nama, kelas, poinBSB, poinPerhatian, hasMB: poinMB.length>0 })
+    });
+    const json = await resp.json();
+    if(json.error) throw new Error(json.error);
+    document.getElementById('f-catatan').value = json.catatan;
+  } catch(e){
+    alert('Gagal generate catatan: '+e.message);
+  } finally {
+    btn.disabled=false; btn.textContent='✨ Generate AI';
+  }
 }
 
 function addCustomPoin(secId, secTitle){
@@ -825,9 +896,14 @@ function buildRaporHTML(data){
     const sec = secMap[secId];
     let rows = '';
     sec.poin.forEach(p=>{
+      const levelTag = p.level ? ` - <span style="font-weight:700;color:#4f46e5">${p.level}</span>` : '';
+      const narasiRow = p.narasi ? `<tr><td></td><td class="pt-narasi">${p.narasi}</td></tr>` : '';
       rows += `
-        <tr class="pt-poin-hdr"><td class="pt-poin-no"></td><td><strong>${p.nama}</strong></td></tr>
-        <tr><td class="pt-poin-no">${p.no}</td><td class="pt-narasi">${p.narasi||'&nbsp;'}</td></tr>`;
+        <tr class="pt-poin-hdr">
+          <td class="pt-poin-no">${p.no}</td>
+          <td><strong>${p.nama}</strong>${levelTag}</td>
+        </tr>
+        ${narasiRow}`;
     });
     const breakCls = idx > 0 ? ' pt-sec-break' : '';
     assessHTML += `
