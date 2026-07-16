@@ -343,7 +343,7 @@ textarea{resize:vertical}
           <label class="lbl">Nama Lengkap Santri</label>
           <div class="ac-wrap">
             <input type="text" id="f-nama" placeholder="Ketik nama santri…" autocomplete="off"
-              oninput="onNamaInput(this.value)" onblur="setTimeout(()=>closeAC(),200)">
+              oninput="onNamaInput(this.value)" onfocus="onNamaInput(this.value)" onblur="setTimeout(()=>closeAC(),200)">
             <div class="ac-list" id="ac-list"></div>
           </div>
         </div>
@@ -708,8 +708,10 @@ function deletePoin(idx){
 // ══════════════════════════════════════════
 function onNamaInput(val){
   const list = document.getElementById('ac-list');
-  if(!val||val.length<2){ list.classList.remove('show'); return; }
-  const matches = state.santriList.filter(s=>s.nama.toLowerCase().includes(val.toLowerCase())).slice(0,8);
+  if(!state.santriList.length){ list.classList.remove('show'); return; }
+  const matches = val
+    ? state.santriList.filter(s=>s.nama.toLowerCase().includes(val.toLowerCase()))
+    : state.santriList;
   if(!matches.length){ list.classList.remove('show'); return; }
   list.innerHTML = matches.map(s=>`
     <div class="ac-item" onmousedown="selectSantri('${escQ(s.nama)}','${s.nisn}','${s.kelas}','${s.cabang}')">
