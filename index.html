@@ -334,6 +334,7 @@ textarea{resize:vertical}
       <div class="card-hdr-title">👤 Data Profil Santri</div>
       <div style="display:flex;align-items:center;gap:8px">
         <span id="draft-indicator" style="font-size:11px;color:#22c55e;opacity:0;transition:opacity .4s"></span>
+        <button onclick="saveDraft()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1.5px solid #6366f1;background:#fff;color:#6366f1;cursor:pointer;font-weight:600" title="Simpan semua data ke draft">💾 Simpan Draft</button>
         <span class="status-pill status-warn" id="sheets-status">
         <span class="status-dot" style="background:#f59e0b"></span>Menghubungkan…
       </span>
@@ -1233,6 +1234,7 @@ function clearForm(){
 // AUTO-SAVE DRAFT (localStorage per santri)
 // ══════════════════════════════════════════
 let _draftTimer = null;
+let _isLoadingDraft = false;
 
 function getDraftKey(){
   const nisn = document.getElementById('f-nisn')?.value.trim();
@@ -1271,6 +1273,7 @@ function saveDraft(){
 }
 
 function saveDraftDebounced(){
+  if(_isLoadingDraft) return;
   clearTimeout(_draftTimer);
   _draftTimer = setTimeout(saveDraft, 800);
 }
@@ -1280,6 +1283,7 @@ function loadDraft(key){
     const raw = localStorage.getItem(key);
     if(!raw) return false;
     const draft = JSON.parse(raw);
+    _isLoadingDraft = true;
     // Restore form fields
     const f = draft.fields || {};
     const setVal = (id, v) => { const el = document.getElementById(id); if(el && v!==undefined) el.value = v; };
@@ -1293,18 +1297,25 @@ function loadDraft(key){
     if(f.kelas){ const el = document.getElementById('f-kelas'); if(el){ el.value=f.kelas; onKelasChange(f.kelas); } }
     if(f.sekolah) setVal('f-sekolah', f.sekolah);
     if(f.semester) setVal('f-semester', f.semester);
-    // Restore assessment
+    // Restore assessment (evidence + narasi + level)
     if(draft.assessment?.length){
       draft.assessment.forEach(dp=>{
         const p = state.assessment.find(a=>a.nama===dp.nama);
         if(p){ p.level=dp.level||''; p.evidence=dp.evidence||''; p.narasi=dp.narasi||''; }
       });
     }
-    // Restore kesimpulan
-    if(draft.kesimpulan) setKesimpulan(draft.kesimpulan);
+    // Restore kesimpulan (tanpa trigger saveDraft)
+    if(draft.kesimpulan){
+      state.kesimpulan = draft.kesimpulan;
+      ['MB','BCB','BSB'].forEach(k=>{
+        const el = document.getElementById(`ko-${k}`);
+        if(el){ el.className='kesim-opt'+(k===draft.kesimpulan?` sel-${k}`:''); el.querySelector('input').checked=(k===draft.kesimpulan); }
+      });
+    }
     renderAssessment();
+    _isLoadingDraft = false;
     return true;
-  } catch(e) { return false; }
+  } catch(e) { _isLoadingDraft = false; return false; }
 }
 
 let _draftIndicatorTimer = null;
