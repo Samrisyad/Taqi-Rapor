@@ -579,11 +579,6 @@ document.addEventListener('DOMContentLoaded', () => {
   onKelasChange('K1');
   loadSantriFromSheets();
 
-  // Auto-save: coba load draft terakhir
-  const lastNisn = localStorage.getItem('taqi_last_nisn');
-  const draftKey = lastNisn ? 'taqi_draft_' + lastNisn : 'taqi_draft_temp';
-  loadDraft(draftKey);
-
   // Hook oninput ke semua form field teks
   ['f-nama','f-nisn','f-walikelas','f-nip','f-tanggal','f-tahun'].forEach(id=>{
     const el = document.getElementById(id);
@@ -823,8 +818,9 @@ function onNamaInput(val){
 }
 
 function selectSantri(nama, nisn, kelas, cabang){
-  // Simpan draft santri yang sedang aktif sebelum ganti
-  saveDraft();
+  // Simpan draft santri yang sedang aktif sebelum ganti (hanya kalau ada NISN aktif)
+  const prevNisn = document.getElementById('f-nisn')?.value.trim();
+  if(prevNisn) saveDraft();
 
   document.getElementById('f-nama').value = nama;
   document.getElementById('f-nisn').value = nisn;
@@ -1266,8 +1262,6 @@ function saveDraft(){
   };
   try {
     localStorage.setItem(key, JSON.stringify(draft));
-    const nisn = document.getElementById('f-nisn')?.value.trim();
-    if(nisn) localStorage.setItem('taqi_last_nisn', nisn);
     showDraftIndicator();
   } catch(e) { /* quota exceeded — ignore */ }
 }
