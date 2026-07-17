@@ -332,9 +332,12 @@ textarea{resize:vertical}
   <div class="card">
     <div class="card-hdr">
       <div class="card-hdr-title">👤 Data Profil Santri</div>
-      <span class="status-pill status-warn" id="sheets-status">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="draft-indicator" style="font-size:11px;color:#22c55e;opacity:0;transition:opacity .4s"></span>
+        <span class="status-pill status-warn" id="sheets-status">
         <span class="status-dot" style="background:#f59e0b"></span>Menghubungkan…
       </span>
+      </div>
     </div>
     <div class="card-body">
       <div class="grid2" style="gap:14px">
@@ -574,6 +577,30 @@ document.addEventListener('DOMContentLoaded', () => {
   onCabangChange('BSD');
   onKelasChange('K1');
   loadSantriFromSheets();
+
+  // Auto-save: coba load draft terakhir
+  const lastNisn = localStorage.getItem('taqi_last_nisn');
+  const draftKey = lastNisn ? 'taqi_draft_' + lastNisn : 'taqi_draft_temp';
+  loadDraft(draftKey);
+
+  // Hook oninput ke semua form field teks
+  ['f-nama','f-nisn','f-walikelas','f-nip','f-tanggal','f-tahun'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', saveDraftDebounced);
+  });
+  // Catatan: debounce lebih panjang karena textarea
+  const catatanEl = document.getElementById('f-catatan');
+  if(catatanEl) catatanEl.addEventListener('input', saveDraftDebounced);
+  // Presensi
+  ['abs-sakit','abs-izin','abs-alpa'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', saveDraftDebounced);
+  });
+  // Select fields
+  ['f-kelas','f-semester','f-cabang'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', saveDraftDebounced);
+  });
 });
 
 // ══════════════════════════════════════════
@@ -683,6 +710,7 @@ function setLevel(idx, level){
     if(btn.textContent.trim()===level) btn.classList.add(`act-${level}`);
   });
   autoKesimpulan();
+  saveDraftDebounced();
 }
 
 function autoKesimpulan(){
@@ -695,7 +723,7 @@ function autoKesimpulan(){
   setKesimpulan(winner);
 }
 
-function updateField(idx, field, val){ state.assessment[idx][field]=val; }
+function updateField(idx, field, val){ state.assessment[idx][field]=val; saveDraftDebounced(); }
 
 function setKesimpulan(val){
   state.kesimpulan = val;
@@ -704,6 +732,7 @@ function setKesimpulan(val){
     el.className = 'kesim-opt'+(k===val?` sel-${k}`:'');
     el.querySelector('input').checked = (k===val);
   });
+  saveDraftDebounced();
 }
 
 async function generateAll(){
@@ -793,6 +822,9 @@ function onNamaInput(val){
 }
 
 function selectSantri(nama, nisn, kelas, cabang){
+  // Simpan draft santri yang sedang aktif sebelum ganti
+  saveDraft();
+
   document.getElementById('f-nama').value = nama;
   document.getElementById('f-nisn').value = nisn;
   // Auto-set kelas & cabang if they match dropdown options
@@ -802,6 +834,15 @@ function selectSantri(nama, nisn, kelas, cabang){
   for(let o of cabangEl.options){ if(o.value===cabang){ cabangEl.value=cabang; break; } }
   onCabangChange(document.getElementById('f-cabang').value);
   onKelasChange(document.getElementById('f-kelas').value);
+
+  // Load draft santri yang dipilih (kalau ada)
+  const hasDraft = loadDraft('taqi_draft_' + nisn);
+  if(!hasDraft){
+    // Reset assessment ke state bersih (kelas sudah di-set oleh onKelasChange)
+    state.assessment.forEach(p=>{ p.level=''; p.evidence=''; p.narasi=''; });
+    state.kesimpulan='';
+    renderAssessment();
+  }
   closeAC();
 }
 
@@ -1170,6 +1211,10 @@ function downloadPDFMobile(){
 // ══════════════════════════════════════════
 function clearForm(){
   if(!confirm('Reset semua data?')) return;
+  // Hapus draft yang sedang aktif
+  const nisn = document.getElementById('f-nisn').value.trim();
+  if(nisn) localStorage.removeItem('taqi_draft_' + nisn);
+  else localStorage.removeItem('taqi_draft_temp');
   ['f-nama','f-nisn','f-walikelas','f-nip','f-catatan'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('f-tahun').value='2025/2026';
   document.getElementById('abs-sakit').value='0';
@@ -1182,6 +1227,94 @@ function clearForm(){
   });
   state.assessment.forEach(p=>{ p.level=''; p.evidence=''; p.narasi=''; });
   renderAssessment();
+}
+
+// ══════════════════════════════════════════
+// AUTO-SAVE DRAFT (localStorage per santri)
+// ══════════════════════════════════════════
+let _draftTimer = null;
+
+function getDraftKey(){
+  const nisn = document.getElementById('f-nisn')?.value.trim();
+  return nisn ? 'taqi_draft_' + nisn : 'taqi_draft_temp';
+}
+
+function saveDraft(){
+  const key = getDraftKey();
+  const draft = {
+    fields: {
+      nama: document.getElementById('f-nama')?.value || '',
+      nisn: document.getElementById('f-nisn')?.value || '',
+      kelas: document.getElementById('f-kelas')?.value || '',
+      semester: document.getElementById('f-semester')?.value || '',
+      tahun: document.getElementById('f-tahun')?.value || '',
+      cabang: document.getElementById('f-cabang')?.value || '',
+      sekolah: document.getElementById('f-sekolah')?.value || '',
+      walikelas: document.getElementById('f-walikelas')?.value || '',
+      nip: document.getElementById('f-nip')?.value || '',
+      tanggal: document.getElementById('f-tanggal')?.value || '',
+      sakit: document.getElementById('abs-sakit')?.value || '0',
+      izin: document.getElementById('abs-izin')?.value || '0',
+      alpa: document.getElementById('abs-alpa')?.value || '0',
+      catatan: document.getElementById('f-catatan')?.value || '',
+    },
+    kesimpulan: state.kesimpulan || '',
+    assessment: state.assessment.map(p=>({ nama: p.nama, level: p.level||'', evidence: p.evidence||'', narasi: p.narasi||'' })),
+    savedAt: Date.now()
+  };
+  try {
+    localStorage.setItem(key, JSON.stringify(draft));
+    const nisn = document.getElementById('f-nisn')?.value.trim();
+    if(nisn) localStorage.setItem('taqi_last_nisn', nisn);
+    showDraftIndicator();
+  } catch(e) { /* quota exceeded — ignore */ }
+}
+
+function saveDraftDebounced(){
+  clearTimeout(_draftTimer);
+  _draftTimer = setTimeout(saveDraft, 800);
+}
+
+function loadDraft(key){
+  try {
+    const raw = localStorage.getItem(key);
+    if(!raw) return false;
+    const draft = JSON.parse(raw);
+    // Restore form fields
+    const f = draft.fields || {};
+    const setVal = (id, v) => { const el = document.getElementById(id); if(el && v!==undefined) el.value = v; };
+    setVal('f-nama', f.nama); setVal('f-nisn', f.nisn);
+    setVal('f-walikelas', f.walikelas); setVal('f-nip', f.nip);
+    setVal('f-catatan', f.catatan); setVal('f-tahun', f.tahun);
+    setVal('abs-sakit', f.sakit); setVal('abs-izin', f.izin); setVal('abs-alpa', f.alpa);
+    setVal('f-tanggal', f.tanggal);
+    // Kelas/cabang trigger via their change handlers
+    if(f.cabang){ const el = document.getElementById('f-cabang'); if(el){ el.value=f.cabang; onCabangChange(f.cabang); } }
+    if(f.kelas){ const el = document.getElementById('f-kelas'); if(el){ el.value=f.kelas; onKelasChange(f.kelas); } }
+    if(f.sekolah) setVal('f-sekolah', f.sekolah);
+    if(f.semester) setVal('f-semester', f.semester);
+    // Restore assessment
+    if(draft.assessment?.length){
+      draft.assessment.forEach(dp=>{
+        const p = state.assessment.find(a=>a.nama===dp.nama);
+        if(p){ p.level=dp.level||''; p.evidence=dp.evidence||''; p.narasi=dp.narasi||''; }
+      });
+    }
+    // Restore kesimpulan
+    if(draft.kesimpulan) setKesimpulan(draft.kesimpulan);
+    renderAssessment();
+    return true;
+  } catch(e) { return false; }
+}
+
+let _draftIndicatorTimer = null;
+function showDraftIndicator(){
+  const el = document.getElementById('draft-indicator');
+  if(!el) return;
+  el.textContent = '✅ Draft tersimpan';
+  el.style.opacity = '1';
+  clearTimeout(_draftIndicatorTimer);
+  _draftIndicatorTimer = setTimeout(()=>{ el.style.opacity='0'; }, 2500);
 }
 
 // ══════════════════════════════════════════
